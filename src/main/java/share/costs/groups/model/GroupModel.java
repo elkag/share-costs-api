@@ -16,4 +16,5 @@ public class GroupModel {
     String name;
     UserModel owner;
     List<UserModel> users;
+    List<UserModel> pendingUsers;
 }

@@ -1,5 +1,7 @@
 package share.costs.users.rest;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import share.costs.users.model.UserModel;
 import share.costs.users.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +26,6 @@ public class UserController {
 
   @PostMapping("/login")
   public LoginResponse loginUser(@RequestBody final LoginRequest request) {
-
     return userService.loginUser(request.getUsername(), request.getPassword());
   }
 

@@ -11,4 +11,6 @@ public interface UserService {
   LoginResponse loginUser(String username, String password);
 
   UsernameCheckResponse checkUsername(String username);
+
+  void joinGroup(String groupId);
 }
