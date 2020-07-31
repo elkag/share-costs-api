@@ -24,9 +24,10 @@ public class GroupConverter {
         group.setId(model.getId());
         group.setName(model.getName());
         group.setOwner(userConverter.convertToEntity(model.getOwner()));
-        group.setUsers(model.getUsers().stream()
+        /*group.setUsers(model.getUsers().stream()
                 .map(userModel -> userConverter.convertToEntity(userModel))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()));*/
+
 
         return group;
     }
@@ -39,10 +40,13 @@ public class GroupConverter {
         model.setId(group.getId());
         model.setName(group.getName());
         model.setOwner(userConverter.convertToModel(group.getOwner()));
+        /*model.setPendingUsers(group.getPendingUsers().stream()
+                .map(user -> userConverter.convertToModel(user))
+                .collect(Collectors.toList()));
         model.setUsers(group.getUsers().stream()
                 .map(user -> userConverter.convertToModel(user))
                 .collect(Collectors.toList()));
-
+*/
 
         return model;
     }

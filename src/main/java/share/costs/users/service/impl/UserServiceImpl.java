@@ -108,6 +108,11 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public void joinGroup(String groupId) {
+
+    }
+
     private User getUser(final String username) {
     final Optional<User> userOpt = userRepository
         .findByUsername(username);
