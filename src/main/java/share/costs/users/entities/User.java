@@ -3,13 +3,14 @@ package share.costs.users.entities;
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
-import share.costs.balances.entities.GroupUserBalance;
+import share.costs.groups.entities.GroupUserBalance;
 import share.costs.constants.Constants;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -49,6 +50,9 @@ public class User {
   @NotNull(message = "Name cannot be null")
   @Email(message = "Invalid email")
   private String email;
+
+  @Column
+  private BigDecimal balance;
 
   @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private List<GroupUserBalance> groupUserBalances;

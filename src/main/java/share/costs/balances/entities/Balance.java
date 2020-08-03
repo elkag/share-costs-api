@@ -3,8 +3,7 @@ package share.costs.balances.entities;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import share.costs.constants.Constants;
-import share.costs.groups.entities.Group;
-import share.costs.users.entities.User;
+import share.costs.groups.entities.GroupUserBalance;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -29,5 +28,5 @@ public class Balance {
     private Date updateDate = new Date();
 
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<GroupUserBalance> userDepartmentRoleLinks;
+    private List<GroupUserBalance> groupUserBalance;
 }

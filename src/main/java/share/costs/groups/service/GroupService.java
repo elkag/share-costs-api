@@ -14,5 +14,7 @@ public interface GroupService {
     List<GroupModel> getUserGroups(String userId);
 
     void joinGroup(String groupId, String username);
+
+    GroupModel getGroup(final String groupId);
 }
 

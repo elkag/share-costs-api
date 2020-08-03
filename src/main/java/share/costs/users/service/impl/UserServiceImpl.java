@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import share.costs.config.security.PasswordEncoder;
 import share.costs.config.security.SecurityConstants;
 import share.costs.users.rest.UsernameCheckResponse;
-import share.costs.users.service.UserConverter;
+import share.costs.users.service.converters.UserConverter;
 import share.costs.users.service.UserService;
 
 import javax.validation.*;

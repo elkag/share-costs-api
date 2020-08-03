@@ -1,8 +1,9 @@
-package share.costs.balances.entities;
+package share.costs.groups.entities;
 
 import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
+import share.costs.balances.entities.Balance;
 import share.costs.constants.Constants;
 import share.costs.groups.entities.Group;
 import share.costs.users.entities.User;

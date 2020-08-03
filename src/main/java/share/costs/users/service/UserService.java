@@ -1,5 +1,6 @@
 package share.costs.users.service;
 
+import share.costs.groups.model.GroupModel;
 import share.costs.users.model.UserModel;
 import share.costs.users.rest.LoginResponse;
 import share.costs.users.rest.UsernameCheckResponse;
@@ -13,4 +14,5 @@ public interface UserService {
   UsernameCheckResponse checkUsername(String username);
 
   void joinGroup(String groupId);
+
 }

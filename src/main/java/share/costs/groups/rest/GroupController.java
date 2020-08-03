@@ -34,15 +34,23 @@ public class GroupController {
         groupService.joinGroup(groupId, username);
     }
 
-    @PostMapping("/add-users/")
+    @PostMapping("/add-users")
     public GroupModel addGroupUsers(@RequestParam final String groupId, @RequestParam List<String> userIds) {
-        groupService.addUsers(groupId, userIds);
-        return null;//groupService.createGroup(createGroupRequest, username);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return groupService.addUsers(groupId, userIds);
     }
 
-    @GetMapping("/")
+    @PostMapping("/get")
+    public GroupModel getGroup(@RequestParam final String groupId) {
+        return groupService.getGroup(groupId);
+    }
+
+    @PostMapping("/get-all")
     public List<GroupModel> getGroups() {
-        return null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return groupService.getUserGroups(username);
     }
 
     @GetMapping("/{userId}")
