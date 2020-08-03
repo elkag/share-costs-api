@@ -2,14 +2,13 @@ package share.costs.users.rest;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import share.costs.exceptions.HttpBadRequestException;
 import share.costs.exceptions.HttpUnauthorizedException;
 import share.costs.users.model.UserModel;
 import share.costs.users.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -34,5 +33,10 @@ public class UserController {
   @PostMapping("/check-username")
   public UsernameCheckResponse checkUsername(@RequestBody final UsernameCheckRequest request) throws HttpBadRequestException {
     return userService.checkUsername(request.getUsername());
+  }
+
+  @PostMapping("/find")
+  public List<UserModel> findUsers(@RequestParam String value) {
+    return userService.findUsers(value);
   }
 }

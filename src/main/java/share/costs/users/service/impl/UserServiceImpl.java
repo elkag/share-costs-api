@@ -1,5 +1,6 @@
 package share.costs.users.service.impl;
 
+import org.springframework.transaction.annotation.Transactional;
 import share.costs.exceptions.HttpBadRequestException;
 import share.costs.users.entities.User;
 import share.costs.users.entities.UserRepository;
@@ -16,9 +17,9 @@ import share.costs.users.service.converters.UserConverter;
 import share.costs.users.service.UserService;
 
 import javax.validation.*;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
@@ -108,16 +109,42 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Transactional
+    @Override
+    public List<UserModel> findUsers(String searchValue) {
+
+        List<UserModel> users = new ArrayList<>();
+
+        (userRepository.findByFirstNameIgnoreCaseStartsWith(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(user -> userConverter.convertToModel(user.get()))
+                .forEach(users::add);
+
+        (userRepository.findByLastNameIgnoreCaseStartsWith(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(user -> userConverter.convertToModel(user.get()))
+                .filter(value -> !users.contains(value))
+                .forEach(users::add);
+
+        (userRepository.findByUsernameIgnoreCaseStartsWith(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(user -> userConverter.convertToModel(user.get()))
+                .filter(value -> !users.contains(value))
+                .forEach(users::add);
+
+        return users;
+    }
+
     @Override
     public void joinGroup(String groupId) {
 
     }
 
     private User getUser(final String username) {
-    final Optional<User> userOpt = userRepository
-        .findByUsername(username);
+        final Optional<User> userOpt = userRepository
+            .findByUsername(username);
 
-    return userOpt.orElse(null);
-  }
+        return userOpt.orElse(null);
+      }
 
 }

@@ -58,9 +58,7 @@ public class GroupServiceImpl implements GroupService {
 
         List<GroupUserModel> groupUserModels = group.getUsers().stream().map(user -> {
             final Optional<GroupUserBalance> gubOpt = groupUserBalanceRepository.findByUserAndGroup(user, group);
-            if(!gubOpt.isPresent())
-                return null;
-            return groupUserConverter.convertToModel(user, gubOpt.get().getBalance());
+            return gubOpt.map(groupUserBalance -> groupUserConverter.convertToModel(user, groupUserBalance.getBalance())).orElse(null);
         }).collect(Collectors.toList());
 
         final GroupModel groupModel = groupConverter.convertToModel(group);
@@ -125,9 +123,9 @@ public class GroupServiceImpl implements GroupService {
 
         List<User> pendingUsers = createGroupRequest.getUserIds().stream()
                 .distinct()
-                .map(value -> userRepository.findById(value))
-                .filter(userOpt -> userOpt.isPresent())
-                .map(userOpt -> userOpt.get())
+                .map(userRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
 
         group.getUsers().add(owner);
@@ -156,9 +154,9 @@ public class GroupServiceImpl implements GroupService {
 
         userIds.stream()
                 .distinct()
-                .map(value -> userRepository.findById(value))
-                .filter(userOpt -> userOpt.isPresent())
-                .map(userOpt -> userOpt.get())
+                .map(userRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .filter(user -> !group.getPendingUsers().contains(user))
                 .forEach(user -> group.getPendingUsers().add(user));
 
@@ -184,9 +182,7 @@ public class GroupServiceImpl implements GroupService {
         final User user = userRepository.findByUsername(username).get();
         log.info("Joining to group new user: {} -> ", user);
 
-        if(group.getPendingUsers().contains(user)) {
-            group.getPendingUsers().remove(user);
-        }
+        group.getPendingUsers().remove(user);
 
         if(group.getUsers().contains(user)) {
             throw new HttpBadRequestException("User is already joined " + group.getName());
@@ -201,14 +197,13 @@ public class GroupServiceImpl implements GroupService {
      *
      * @param user User entity
      * @param group Group entity
-     * @return the saved entity, including the updated id field
      */
     @Transactional
-    private GroupUserBalance createBalance(User user, Group group) {
+    private void createBalance(User user, Group group) {
         GroupUserBalance balance = new GroupUserBalance();
         balance.setUser(user);
         balance.setGroup(group);
         balance.setBalance(new Balance());
-        return groupUserBalanceRepository.save(balance);
+        groupUserBalanceRepository.save(balance);
     }
 }
