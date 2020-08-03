@@ -4,8 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import share.costs.users.entities.User;
+import share.costs.users.model.GroupUserModel;
 import share.costs.users.model.UserModel;
 
+import javax.persistence.Column;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -14,7 +20,12 @@ import java.util.List;
 public class GroupModel {
     String id;
     String name;
-    UserModel owner;
-    List<UserModel> users;
-    List<UserModel> pendingUsers;
+    GroupUserModel owner;
+    private Date date;
+    private String status;
+    private BigDecimal balance;
+    private String description;
+    List<GroupUserModel> users;
+    List<GroupUserModel> pendingUsers;
+
 }

@@ -1,7 +1,6 @@
-package share.costs.balances.entities;
+package share.costs.groups.entities;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import share.costs.groups.entities.Group;
 import share.costs.users.entities.User;
 
 import java.util.Optional;

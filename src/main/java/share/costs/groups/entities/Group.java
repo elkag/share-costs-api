@@ -2,9 +2,8 @@ package share.costs.groups.entities;
 
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
-import share.costs.balances.entities.Balance;
-import share.costs.balances.entities.GroupUserBalance;
 import share.costs.constants.Constants;
+import static share.costs.groups.constants.GroupConstants.GROUP_STATUS_ACTIVE;
 import share.costs.users.entities.User;
 
 import javax.persistence.*;
@@ -33,7 +32,7 @@ public class Group {
     private Date date = new Date();
 
     @Column(name = "status", nullable = false, columnDefinition = "varchar(36) default 'new'")
-    private String status = "new";
+    private String status = GROUP_STATUS_ACTIVE;
 
     @Column(name = "group_balance", nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
