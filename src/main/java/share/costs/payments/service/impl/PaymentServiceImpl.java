@@ -85,14 +85,17 @@ public class PaymentServiceImpl implements PaymentService {
         group.getUsers().stream().filter(current -> !user.equals(current)).forEach(current -> {
             GroupUserBalance gub = groupUserBalanceRepository.findByUserAndGroup(current, group).get();
             Balance balance = gub.getBalance();
-            balance.setBalance(balance.getBalance().add(userPartition));
+            balance.setCosts((balance.getCosts()).add(userPartition));
+            balance.setBalance((balance.getSpending()).add(balance.getCosts()));
             gub.setBalance(balance);
             balancesRepository.save(balance);
         });
 
         GroupUserBalance gub = groupUserBalanceRepository.findByUserAndGroup(user, group).get();
         Balance balance = gub.getBalance();
-        balance.setBalance(balance.getBalance().add(payment.getAmount().add(userPartition)));
+        balance.setCosts((balance.getCosts()).add(userPartition));
+        balance.setSpending((balance.getSpending()).add(payment.getAmount()));
+        balance.setBalance((balance.getSpending()).add(balance.getCosts()));
         balancesRepository.save(balance);
     }
 }

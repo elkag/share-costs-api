@@ -19,6 +19,8 @@ public class GroupUserConverter {
         model.setLastName(user.getLastName());
         model.setEmail(user.getEmail());
         model.setBalance(balance.getBalance());
+        model.setCosts(balance.getCosts());
+        model.setSpending(balance.getSpending());
 
         return model;
     }
