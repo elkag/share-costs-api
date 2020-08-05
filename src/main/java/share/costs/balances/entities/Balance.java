@@ -20,8 +20,17 @@ public class Balance {
     @Column(name = "id", length = Constants.UUID_SIZE)
     private String id;
 
+    // How much ows the group or the group owes to user
     @Column(name = "balance", nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
+
+    // How much the user gave to the group
+    @Column(name = "spending", nullable = false)
+    private BigDecimal spending = BigDecimal.ZERO;
+
+    // What the user has to pay
+    @Column(name = "costs", nullable = false)
+    private BigDecimal costs = BigDecimal.ZERO;
 
     @Column(name = "updated")
     @Temporal(TemporalType.TIMESTAMP)

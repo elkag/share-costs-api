@@ -23,4 +23,8 @@ public class GroupUserModel {
     private String email;
 
     private BigDecimal balance;
+
+    private BigDecimal costs;
+
+    private BigDecimal spending;
 }

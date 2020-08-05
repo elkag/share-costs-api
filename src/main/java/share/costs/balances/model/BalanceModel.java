@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 public class BalanceModel {
     private String id;
     private BigDecimal balance;
+    private BigDecimal spending;
+    private BigDecimal costs;
     private Group group;
     private User user;
 }

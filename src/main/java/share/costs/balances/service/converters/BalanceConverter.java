@@ -21,6 +21,8 @@ public class BalanceConverter {
         final BalanceModel model = new BalanceModel();
         model.setId(balance.getId());
         model.setBalance(balance.getBalance());
+        model.setSpending(balance.getSpending());
+        model.setCosts(balance.getCosts());
 
         return model;
 
