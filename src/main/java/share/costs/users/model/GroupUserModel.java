@@ -2,7 +2,6 @@ package share.costs.users.model;
 
 import lombok.Data;
 import lombok.ToString;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 

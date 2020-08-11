@@ -56,7 +56,7 @@ public class Group {
                     foreignKey = @ForeignKey(name = "fk_group_pending_users_users"))})
     private List<User> pendingUsers = new ArrayList<User>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "group_users",
             joinColumns = {@JoinColumn(name = "bunch_id", nullable = true,
                     foreignKey = @ForeignKey(name = "fk_bunch_users_bunches"))},

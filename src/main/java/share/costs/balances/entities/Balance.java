@@ -36,6 +36,6 @@ public class Balance {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateDate = new Date();
 
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "balance", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<GroupUserBalance> groupUserBalance;
 }

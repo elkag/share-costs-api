@@ -10,15 +10,19 @@ import share.costs.groups.entities.GroupUserBalanceRepository;
 import share.costs.exceptions.HttpBadRequestException;
 import share.costs.groups.entities.Group;
 import share.costs.groups.entities.GroupsRepository;
-import share.costs.payments.entities.Payment;
-import share.costs.payments.entities.PaymentsRepository;
+import share.costs.payments.entities.*;
 import share.costs.payments.rest.PaymentRequest;
 import share.costs.payments.service.PaymentService;
+import share.costs.payments.service.converters.UserInPaymentConverter;
 import share.costs.users.entities.User;
 import share.costs.users.entities.UserRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.math.BigDecimal.valueOf;
 
@@ -31,17 +35,24 @@ public class PaymentServiceImpl implements PaymentService {
     private final GroupUserBalanceRepository groupUserBalanceRepository;
     private final PaymentsRepository paymentsRepository;
     private final BalancesRepository balancesRepository;
+    private final UserInPaymentConverter userInPaymentConverter;
+    private final UserInPaymentRepository userInPaymentRepository;
+
 
 
     public PaymentServiceImpl(GroupsRepository groupsRepository,
                               UserRepository userRepository,
                               PaymentsRepository paymentsRepository,
-                              GroupUserBalanceRepository groupUserBalanceRepository, BalancesRepository balancesRepository) {
+                              GroupUserBalanceRepository groupUserBalanceRepository,
+                              BalancesRepository balancesRepository,
+                              UserInPaymentConverter userInPaymentConverter, UserInPaymentRepository userInPaymentRepository) {
         this.groupsRepository = groupsRepository;
         this.userRepository = userRepository;
         this.paymentsRepository = paymentsRepository;
         this.groupUserBalanceRepository = groupUserBalanceRepository;
         this.balancesRepository = balancesRepository;
+        this.userInPaymentConverter = userInPaymentConverter;
+        this.userInPaymentRepository = userInPaymentRepository;
     }
 
     @Override
@@ -63,39 +74,54 @@ public class PaymentServiceImpl implements PaymentService {
             throw  new HttpBadRequestException("User does not in the group: " + group.getName());
         }
 
-        final Payment payment = new Payment();
-        payment.setUser(user);
-        payment.setGroup(group);
-        payment.setAmount(paymentRequest.getAmount());
-        payment.setDescription(paymentRequest.getDescription());
-        paymentsRepository.save(payment);
+        Optional<Integer> totalSumInUsers = paymentRequest.getUsers().stream().map(u -> u.getAmount()).reduce(Integer::sum);
 
-        recalculateUserBalances(group, user, payment);
+        if(Math.abs(paymentRequest.getTotal() - totalSumInUsers.get()) > 1) {
+            throw  new HttpBadRequestException("Incorrect amounts are provided for paymentRequest: " + paymentRequest);
+        }
+
+        final Payment payment = new Payment();
+        payment.setGroup(group);
+
+        //total in PaymentRequest: Integer
+        BigDecimal totalAmount = new BigDecimal(Integer.toString(paymentRequest.getTotal())).movePointLeft(2);
+        payment.setAmount(totalAmount);
+        payment.setDescription(paymentRequest.getDescription());
+        payment.setType(paymentRequest.getType());
+        payment.setUser(user);
+        Payment paymentEntity = paymentsRepository.save(payment);
+
+        payment.setUsersInPayment( paymentRequest.getUsers().stream()
+                            .map(userInPaymentConverter::convertToEntity)
+                            .peek(userInPayment -> userInPayment.setPayment(paymentEntity))
+                            .map(userInPaymentRepository::save)
+                            .collect(Collectors.toList()));
+
+        setUserBalances(payment);
 
         group.setBalance(group.getBalance().add(payment.getAmount()));
         groupsRepository.save(group);
     }
 
     @Transactional
-    private void recalculateUserBalances(Group group, User user, Payment payment) {
-        final int divisor = group.getUsers().size();
+    private void setUserBalances(Payment payment) {
 
-        final BigDecimal userPartition = payment.getAmount().divide(valueOf(divisor), 6, RoundingMode.HALF_EVEN).negate();
+        payment.getUsersInPayment().stream().forEach(current -> {
+            if(!userRepository.existsById(current.getUser().getId())) {
+                throw new  HttpBadRequestException("User entity does not exist for if: " + current.getId());
+            }
 
-        group.getUsers().stream().filter(current -> !user.equals(current)).forEach(current -> {
-            GroupUserBalance gub = groupUserBalanceRepository.findByUserAndGroup(current, group).get();
+            GroupUserBalance gub = groupUserBalanceRepository.findByUserAndGroup(current.getUser(), payment.getGroup()).get();
             Balance balance = gub.getBalance();
-            balance.setCosts((balance.getCosts()).add(userPartition));
+
+            if(payment.getUser().getId().equals(current.getUser().getId())) {
+                balance.setSpending(balance.getSpending().add(payment.getAmount()));
+            }
+
+            balance.setCosts((balance.getCosts()).add(current.getAmount().negate()));
             balance.setBalance((balance.getSpending()).add(balance.getCosts()));
             gub.setBalance(balance);
             balancesRepository.save(balance);
         });
-
-        GroupUserBalance gub = groupUserBalanceRepository.findByUserAndGroup(user, group).get();
-        Balance balance = gub.getBalance();
-        balance.setCosts((balance.getCosts()).add(userPartition));
-        balance.setSpending((balance.getSpending()).add(payment.getAmount()));
-        balance.setBalance((balance.getSpending()).add(balance.getCosts()));
-        balancesRepository.save(balance);
     }
 }

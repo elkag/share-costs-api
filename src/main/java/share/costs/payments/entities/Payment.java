@@ -9,6 +9,7 @@ import share.costs.users.entities.User;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -30,6 +31,9 @@ public class Payment {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "type")
+    private PaymentType type;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
     private User user;
@@ -37,4 +41,8 @@ public class Payment {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bunch_id", foreignKey = @ForeignKey(name = "fk_bunches_id"))
     private Group group;
+
+    @OneToMany(mappedBy="payment")
+    private List<UserInPayment> usersInPayment;
+
 }

@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
+import static share.costs.config.security.SecurityConstants.USERS_URL;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -15,8 +16,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(final HttpSecurity http) throws Exception {
     http.cors().and().csrf().disable();
     http.authorizeRequests()
-        .antMatchers(HttpMethod.POST, SecurityConstants.USERS_URL).permitAll()
-            .antMatchers(HttpMethod.POST, SecurityConstants.LOGIN_URL).permitAll()
+            .antMatchers(HttpMethod.POST, USERS_URL).permitAll()
         .anyRequest().authenticated()
         .and()
             .addFilter(new JWTAuthorizationFilter(authenticationManager()))

@@ -52,7 +52,7 @@ public class User {
   private String email;
 
   @Column
-  private BigDecimal balance;
+  private BigDecimal balance = BigDecimal.ZERO;
 
   @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private List<GroupUserBalance> groupUserBalances;
