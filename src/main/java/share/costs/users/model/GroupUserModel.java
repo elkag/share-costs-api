@@ -21,9 +21,9 @@ public class GroupUserModel {
     @ToString.Exclude
     private String email;
 
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
-    private BigDecimal costs;
+    private BigDecimal costs = BigDecimal.ZERO;
 
-    private BigDecimal spending;
+    private BigDecimal spending = BigDecimal.ZERO;
 }

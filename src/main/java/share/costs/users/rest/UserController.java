@@ -34,9 +34,4 @@ public class UserController {
   public UsernameCheckResponse checkUsername(@RequestBody final UsernameCheckRequest request) throws HttpBadRequestException {
     return userService.checkUsername(request.getUsername());
   }
-
-  @PostMapping("/find")
-  public List<UserModel> findUsers(@RequestParam String value) {
-    return userService.findUsers(value);
-  }
 }

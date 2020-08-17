@@ -109,32 +109,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Transactional
-    @Override
-    public List<UserModel> findUsers(String searchValue) {
-
-        List<UserModel> users = new ArrayList<>();
-
-        (userRepository.findByFirstNameIgnoreCaseStartsWith(searchValue)).stream()
-                .filter(Optional::isPresent)
-                .map(user -> userConverter.convertToModel(user.get()))
-                .forEach(users::add);
-
-        (userRepository.findByLastNameIgnoreCaseStartsWith(searchValue)).stream()
-                .filter(Optional::isPresent)
-                .map(user -> userConverter.convertToModel(user.get()))
-                .filter(value -> !users.contains(value))
-                .forEach(users::add);
-
-        (userRepository.findByUsernameIgnoreCaseStartsWith(searchValue)).stream()
-                .filter(Optional::isPresent)
-                .map(user -> userConverter.convertToModel(user.get()))
-                .filter(value -> !users.contains(value))
-                .forEach(users::add);
-
-        return users;
-    }
-
     @Override
     public void joinGroup(String groupId) {
 

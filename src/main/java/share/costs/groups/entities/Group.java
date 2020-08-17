@@ -4,6 +4,8 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import share.costs.constants.Constants;
 import static share.costs.groups.constants.GroupConstants.GROUP_STATUS_ACTIVE;
+
+import share.costs.users.entities.PendingUser;
 import share.costs.users.entities.User;
 
 import javax.persistence.*;
@@ -50,11 +52,11 @@ public class Group {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "group_pending_users",
-            joinColumns = {@JoinColumn(name = "group_pending_id", nullable = true,
-                    foreignKey = @ForeignKey(name = "fk_group_pending_users_bunches"))},
-            inverseJoinColumns = {@JoinColumn(name = "group_pending_user_id", nullable = false,
-                    foreignKey = @ForeignKey(name = "fk_group_pending_users_users"))})
-    private List<User> pendingUsers = new ArrayList<User>();
+            joinColumns = {@JoinColumn(name = "bunch_id", nullable = true,
+                    foreignKey = @ForeignKey(name = "fk_bunch_pending_users_bunches"))},
+            inverseJoinColumns = {@JoinColumn(name = "bunch_pending_user_id", nullable = false,
+                    foreignKey = @ForeignKey(name = "fk_bunch_pending_users_users"))})
+    private List<PendingUser> pendingUsers = new ArrayList<PendingUser>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "group_users",

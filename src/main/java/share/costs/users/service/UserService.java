@@ -18,6 +18,4 @@ public interface UserService {
 
   void joinGroup(String groupId);
 
-  public List<UserModel> findUsers(String searchValue);
-
 }

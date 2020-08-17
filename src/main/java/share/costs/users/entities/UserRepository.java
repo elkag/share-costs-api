@@ -1,6 +1,7 @@
 package share.costs.users.entities;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import share.costs.groups.entities.Group;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,5 +21,8 @@ public interface UserRepository extends JpaRepository<User, String> {
   List<Optional<User>> findByFirstNameIgnoreCaseStartsWith(String firstName);
 
   List<Optional<User>> findByLastNameIgnoreCaseStartsWith(String lastName);
+
+  List<Optional<User>> findByEmailIgnoreCaseContains(String email);
+
 }
 

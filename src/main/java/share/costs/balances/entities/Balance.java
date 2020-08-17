@@ -37,5 +37,5 @@ public class Balance {
     private Date updateDate = new Date();
 
     @OneToMany(mappedBy = "balance", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<GroupUserBalance> groupUserBalance;
+    private List<GroupUserBalance> groupUserBalance = null;
 }

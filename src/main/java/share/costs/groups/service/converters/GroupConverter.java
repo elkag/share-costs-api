@@ -47,7 +47,7 @@ public class GroupConverter {
         model.setStatus(group.getStatus());
         model.setBalance(group.getBalance());
         model.setPendingUsers(group.getPendingUsers().stream()
-                .map(user -> groupUserConverter.convertToModel(user, new Balance()))
+                .map(user -> groupUserConverter.convertToModel(user))
                 .collect(Collectors.toList()));
 
         model.setUsers(group.getUsers().stream()

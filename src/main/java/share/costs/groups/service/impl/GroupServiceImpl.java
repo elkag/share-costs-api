@@ -10,16 +10,23 @@ import share.costs.exceptions.HttpBadRequestException;
 import share.costs.groups.entities.Group;
 import share.costs.groups.entities.GroupsRepository;
 import share.costs.groups.model.GroupModel;
+import share.costs.groups.rest.AddUserRequest;
 import share.costs.groups.rest.CreateGroupRequest;
+import share.costs.groups.rest.RemoveUserRequest;
 import share.costs.groups.service.GroupService;
 import share.costs.groups.service.converters.GroupConverter;
+import share.costs.users.entities.PendingUser;
+import share.costs.users.entities.PendingUserRepository;
 import share.costs.users.entities.User;
 import share.costs.users.entities.UserRepository;
 import share.costs.users.model.GroupUserModel;
+import share.costs.users.model.UserModel;
 import share.costs.users.service.converters.GroupUserConverter;
+import share.costs.users.service.converters.UserConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,19 +37,25 @@ public class GroupServiceImpl implements GroupService {
     private final GroupsRepository groupRepository;
     private final GroupConverter groupConverter;
     private final UserRepository userRepository;
+    private final PendingUserRepository pendingUserRepository;
     private final GroupUserBalanceRepository groupUserBalanceRepository;
     private final GroupUserConverter groupUserConverter;
+    private final UserConverter userConverter;
 
     public GroupServiceImpl(final GroupsRepository groupRepository,
                             final GroupConverter groupConverter,
                             final UserRepository userRepository,
+                            PendingUserRepository pendingUserRepository,
                             GroupUserBalanceRepository groupUserBalanceRepository,
-                            GroupUserConverter groupUserConverter) {
+                            GroupUserConverter groupUserConverter,
+                            UserConverter userConverter) {
         this.groupRepository = groupRepository;
         this.groupConverter = groupConverter;
         this.userRepository = userRepository;
+        this.pendingUserRepository = pendingUserRepository;
         this.groupUserBalanceRepository = groupUserBalanceRepository;
         this.groupUserConverter = groupUserConverter;
+        this.userConverter = userConverter;
     }
 
     @Override
@@ -59,7 +72,7 @@ public class GroupServiceImpl implements GroupService {
         List<GroupUserModel> groupUserModels = group.getUsers().stream().map(user -> {
             final Optional<GroupUserBalance> gubOpt = groupUserBalanceRepository.findByUserAndGroup(user, group);
             return gubOpt.map(groupUserBalance -> groupUserConverter.convertToModel(user, groupUserBalance.getBalance())).orElse(null);
-        }).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
 
         final GroupModel groupModel = groupConverter.convertToModel(group);
         groupModel.setUsers(groupUserModels);
@@ -81,7 +94,9 @@ public class GroupServiceImpl implements GroupService {
         final User user = userRepository.findByUsername(username).get();
 
         final List<Group> groups = groupRepository.findGroupsByUsersId(user.getId());
+        final List<Group> pendingGroups = groupRepository.findGroupsByPendingUsersUserId(user.getId());
 
+        groups.addAll(pendingGroups);
         final List<GroupModel> models = new ArrayList<GroupModel>();
 
         groups.forEach(group -> {
@@ -120,16 +135,9 @@ public class GroupServiceImpl implements GroupService {
         final Group group = new Group();
         group.setOwner(owner);
         group.setName(createGroupRequest.getName());
-
-        List<User> pendingUsers = createGroupRequest.getUserIds().stream()
-                .distinct()
-                .map(userRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
+        group.setDescription(createGroupRequest.getDescription());
 
         group.getUsers().add(owner);
-        group.getPendingUsers().addAll(pendingUsers);
 
         groupRepository.save(group);
 
@@ -142,32 +150,114 @@ public class GroupServiceImpl implements GroupService {
         return created;
     }
 
-    @Override
+
     @Transactional
-    public GroupModel addUsers(final String groupId, final List<String> userIds) {
+    @Override
+    public List<UserModel> findUsers(String groupId, String searchValue) {
+
+        if(!groupRepository.findById(groupId).isPresent()) {
+            throw new HttpBadRequestException("error");
+        }
+        List<UserModel> users = new ArrayList<>();
+
+        List<User> existsUsers = groupRepository.findById(groupId).get().getUsers();
+
+        Group g = groupRepository.findById(groupId).get();
+
+        (userRepository.findByFirstNameIgnoreCaseStartsWith(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(u -> !existsUsers.contains(u))
+                .map(userConverter::convertToModel)
+                .forEach(users::add);
+
+        (userRepository.findByLastNameIgnoreCaseStartsWith(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(u -> !existsUsers.contains(u))
+                .map(userConverter::convertToModel)
+                .filter(value -> !users.contains(value))
+                .forEach(users::add);
+
+        (userRepository.findByUsernameIgnoreCaseStartsWith(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(u -> !existsUsers.contains(u))
+                .map(userConverter::convertToModel)
+                .filter(value -> !users.contains(value))
+                .forEach(users::add);
+
+        (userRepository.findByEmailIgnoreCaseContains(searchValue)).stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(u -> !existsUsers.contains(u))
+                .map(userConverter::convertToModel)
+                .filter(value -> !users.contains(value))
+                .forEach(users::add);
+
+        return users;
+    }
+
+    @Override
+    public GroupModel removeGroupPendingUser(RemoveUserRequest request) {
+
+        final String userId = request.getUserId();
+        final String groupId = request.getGroupId();
         if (!groupRepository.existsById(groupId)) {
             throw new HttpBadRequestException("Group entity does not exist for id: " + groupId);
+        }
+
+        if (!userRepository.existsById(userId)) {
+            throw new HttpBadRequestException("User entity does not exist for id: " + groupId);
         }
 
         final Group group = groupRepository.findById(groupId).get();
         log.info("Create update BEGIN: {} -> ", group);
 
-        userIds.stream()
-                .distinct()
-                .map(userRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(user -> !group.getPendingUsers().contains(user))
-                .forEach(user -> group.getPendingUsers().add(user));
+        final User user = userRepository.findById(userId).get();
+
+        final List<PendingUser> pendings = group.getPendingUsers().stream().filter(u -> !u.getUser().getId().equals(user.getId())).collect(Collectors.toList());
+
+        group.setPendingUsers(pendings);
 
         final GroupModel updated = groupConverter.convertToModel(groupRepository.save(group));
+
         log.info("Create update END: {} -> ", updated);
         return updated;
     }
 
     @Override
     @Transactional
-    public void joinGroup(String groupId, String username ){
+    public GroupModel addUser(final AddUserRequest request) {
+        final String groupId = request.getGroupId();
+        final String userId = request.getUserId();
+
+        if (!groupRepository.existsById(groupId)) {
+            throw new HttpBadRequestException("Group entity does not exist for id: " + groupId);
+        }
+
+        final Group group = groupRepository.findById(groupId).get();
+        log.info("Update BEGIN: {} -> ", group);
+
+        final User user = userRepository.findById(userId).get();
+        final boolean isExist;
+        isExist = group.getPendingUsers().contains(user);
+        if(!isExist) {
+            final PendingUser pending = new PendingUser();
+            pending.setUser(user);
+            PendingUser updated = pendingUserRepository.save(pending);
+            group.getPendingUsers().add(updated);
+        }
+
+        final Group saved = groupRepository.save(group);
+        final GroupModel updated = groupConverter.convertToModel(saved);
+        log.info("Create update END: {} -> ", updated);
+        return updated;
+    }
+
+    @Override
+    @Transactional
+    public GroupModel joinGroup(String groupId, String username ){
         if (!groupRepository.existsById(groupId)) {
             throw new HttpBadRequestException("Group entity does not exist for id: " + groupId);
         }
@@ -182,7 +272,15 @@ public class GroupServiceImpl implements GroupService {
         final User user = userRepository.findByUsername(username).get();
         log.info("Joining to group new user: {} -> ", user);
 
-        group.getPendingUsers().remove(user);
+        final List<PendingUser> pendingList = pendingUserRepository.findByUserId(user.getId());
+
+        Optional<PendingUser> pendingOpt = pendingList.stream().filter(group.getPendingUsers()::contains).findAny();
+
+        if(pendingOpt == null || !pendingOpt.isPresent() || !group.getPendingUsers().contains(pendingOpt.get())) {
+            throw new HttpBadRequestException("User is not pending for group " + group.getName());
+        }
+
+        group.getPendingUsers().remove(pendingOpt.get());
 
         if(group.getUsers().contains(user)) {
             throw new HttpBadRequestException("User is already joined " + group.getName());
@@ -191,6 +289,9 @@ public class GroupServiceImpl implements GroupService {
         group.getUsers().add(user);
 
         createBalance(user, group);
+
+        return groupConverter.convertToModel(groupRepository.save(group));
+
     }
 
     /**

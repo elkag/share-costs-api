@@ -11,6 +11,7 @@ import share.costs.exceptions.HttpBadRequestException;
 import share.costs.groups.entities.Group;
 import share.costs.groups.entities.GroupsRepository;
 import share.costs.payments.entities.*;
+import share.costs.payments.model.UserInPaymentModel;
 import share.costs.payments.rest.PaymentRequest;
 import share.costs.payments.service.PaymentService;
 import share.costs.payments.service.converters.UserInPaymentConverter;
@@ -18,13 +19,8 @@ import share.costs.users.entities.User;
 import share.costs.users.entities.UserRepository;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.math.BigDecimal.valueOf;
 
 @Service
 @Log4j2
@@ -74,10 +70,14 @@ public class PaymentServiceImpl implements PaymentService {
             throw  new HttpBadRequestException("User does not in the group: " + group.getName());
         }
 
-        Optional<Integer> totalSumInUsers = paymentRequest.getUsers().stream().map(u -> u.getAmount()).reduce(Integer::sum);
+        Optional<Integer> totalSumInUsers = paymentRequest.getUsers().stream().map(UserInPaymentModel::getAmount).reduce(Integer::sum);
+
+        if(paymentRequest.getTotal().equals(0)) {
+            throw  new HttpBadRequestException("Incorrect total amount  in paymentRequest: " + paymentRequest);
+        }
 
         if(Math.abs(paymentRequest.getTotal() - totalSumInUsers.get()) > 1) {
-            throw  new HttpBadRequestException("Incorrect amounts are provided for paymentRequest: " + paymentRequest);
+            throw  new HttpBadRequestException("Incorrect amounts in paymentRequest: " + paymentRequest);
         }
 
         final Payment payment = new Payment();
@@ -106,7 +106,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     private void setUserBalances(Payment payment) {
 
-        payment.getUsersInPayment().stream().forEach(current -> {
+        payment.getUsersInPayment().forEach(current -> {
             if(!userRepository.existsById(current.getUser().getId())) {
                 throw new  HttpBadRequestException("User entity does not exist for if: " + current.getId());
             }

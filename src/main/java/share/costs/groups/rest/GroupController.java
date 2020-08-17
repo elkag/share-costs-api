@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import share.costs.groups.model.GroupModel;
 import share.costs.groups.service.GroupService;
+import share.costs.users.model.UserModel;
 
 import java.util.List;
 
@@ -28,17 +29,20 @@ public class GroupController {
     }
 
     @PostMapping("/join")
-    public void joinGroup(@RequestParam final String groupId) {
+    public GroupModel joinGroup(@RequestParam final String groupId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        groupService.joinGroup(groupId, username);
+        return groupService.joinGroup(groupId, username);
     }
 
-    @PostMapping("/add-users")
-    public GroupModel addGroupUsers(@RequestParam final String groupId, @RequestParam List<String> userIds) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return groupService.addUsers(groupId, userIds);
+    @PostMapping("/add-user")
+    public GroupModel addGroupUsers(@RequestBody final AddUserRequest request) {
+        return groupService.addUser(request);
+    }
+
+    @PostMapping("/remove-user")
+    public GroupModel removeGroupPendingUser(@RequestBody final RemoveUserRequest request) {
+        return groupService.removeGroupPendingUser(request);
     }
 
     @PostMapping("/get")
@@ -56,5 +60,13 @@ public class GroupController {
     @GetMapping("/{userId}")
     public List<GroupModel> getUserGroups(@PathVariable String userId) {
         return groupService.getUserGroups(userId);
+    }
+
+    @PostMapping("/find-new-members")
+    public List<UserModel> findUsers(@RequestParam String groupId, @RequestParam String value) {
+        if(value.length() < 2) {
+            return null;
+        }
+        return groupService.findUsers(groupId, value);
     }
 }

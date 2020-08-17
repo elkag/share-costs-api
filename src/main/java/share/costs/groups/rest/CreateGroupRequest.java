@@ -12,5 +12,6 @@ import java.util.List;
 public class CreateGroupRequest {
 
     String name;
+    String description = "";
     List<String> userIds;
 }
