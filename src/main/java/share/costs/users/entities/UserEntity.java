@@ -1,6 +1,7 @@
 package share.costs.users.entities;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import share.costs.groups.entities.GroupUserBalance;
@@ -13,10 +14,11 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
   @Id
   @GeneratedValue(generator = "uuid")
@@ -24,11 +26,10 @@ public class User {
   @Column(name = "id", length = Constants.UUID_SIZE)
   private String id;
 
-  @Column(unique = true, nullable = false)
-  @Size(min = 3, max = 30, message
-          = "Username must be between 3 and 30 characters")
-  @NotNull(message = "Username cannot be null")
-  private String username;
+  @Column(nullable = false)
+  @NotNull(message = "Email cannot be null")
+  @Email(message = "Invalid email")
+  private String email;
 
   @Column(nullable = false)
   @ToString.Exclude
@@ -46,15 +47,24 @@ public class User {
   @Column(nullable = false)
   private String lastName;
 
-  @Column(nullable = false)
-  @NotNull(message = "Name cannot be null")
-  @Email(message = "Invalid email")
-  private String email;
-
   @Column
   private BigDecimal balance = BigDecimal.ZERO;
+
+  @Column
+  private String image = "";
 
   @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private List<GroupUserBalance> groupUserBalances;
 
+  @OneToMany(
+          cascade = CascadeType.ALL,
+          orphanRemoval = true,
+          fetch = FetchType.EAGER)
+  @JoinColumn(name="user_id")
+  private List<RoleEntity> roles;
+
+  public UserEntity setRoles(List<RoleEntity> roles) {
+    this.roles = roles;
+    return this;
+  }
 }

@@ -1,7 +1,6 @@
 package share.costs.users.entities;
 
 import lombok.Data;
-import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import share.costs.constants.Constants;
 
@@ -20,5 +19,5 @@ public class PendingUser {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user", nullable = false,
             foreignKey = @ForeignKey(name = "fk_pending_users_users"))
-    private User user;
+    private UserEntity user;
 }

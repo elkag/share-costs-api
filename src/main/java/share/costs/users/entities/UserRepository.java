@@ -1,28 +1,21 @@
 package share.costs.users.entities;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import share.costs.groups.entities.Group;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<UserEntity, String> {
 
-  Boolean existsUserByUsername(String username);
+  Optional<UserEntity> findOneByEmail(String username);
 
-  Optional<User> findByUsername(String username);
+  Optional<UserEntity> findById(String id);
 
-  Optional<User> findByEmail(String username);
+  List<Optional<UserEntity>> findByFirstNameIgnoreCaseStartsWith(String firstName);
 
-  Optional<User> findById(String id);
+  List<Optional<UserEntity>> findByLastNameIgnoreCaseStartsWith(String lastName);
 
-  List<Optional<User>> findByUsernameIgnoreCaseStartsWith(String username);
-
-  List<Optional<User>> findByFirstNameIgnoreCaseStartsWith(String firstName);
-
-  List<Optional<User>> findByLastNameIgnoreCaseStartsWith(String lastName);
-
-  List<Optional<User>> findByEmailIgnoreCaseContains(String email);
+  List<Optional<UserEntity>> findByEmailIgnoreCaseContains(String email);
 
 }
 

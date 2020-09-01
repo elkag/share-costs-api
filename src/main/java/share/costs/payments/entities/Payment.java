@@ -4,7 +4,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import share.costs.constants.Constants;
 import share.costs.groups.entities.Group;
-import share.costs.users.entities.User;
+import share.costs.users.entities.UserEntity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -36,7 +36,7 @@ public class Payment {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_users_id"))
-    private User user;
+    private UserEntity user;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bunch_id", foreignKey = @ForeignKey(name = "fk_bunches_id"))

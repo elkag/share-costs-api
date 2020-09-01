@@ -1,124 +1,160 @@
 package share.costs.users.service.impl;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import share.costs.exceptions.HttpBadRequestException;
-import share.costs.users.entities.User;
+import share.costs.exceptions.HttpUnauthorizedException;
+import share.costs.users.auth.UserDetailsServiceImpl;
+import share.costs.users.entities.RoleEntity;
+import share.costs.users.entities.UserEntity;
 import share.costs.users.entities.UserRepository;
 import share.costs.users.model.UserModel;
-import share.costs.users.rest.LoginResponse;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import share.costs.config.security.PasswordEncoder;
-import share.costs.config.security.SecurityConstants;
-import share.costs.users.rest.UsernameCheckResponse;
+import share.costs.users.oauth2.userInfo.OAuth2UserInfo;
+import share.costs.users.auth.UserDetailsService;
 import share.costs.users.service.converters.UserConverter;
 import share.costs.users.service.UserService;
 
 import javax.validation.*;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Service
-@Log4j2
 public class UserServiceImpl implements UserService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
   private final UserConverter userConverter;
+  private final UserDetailsService userDetailsService;
 
   public UserServiceImpl(final UserRepository userRepository,
-      final UserConverter userConverter) {
+                         final UserConverter userConverter, UserDetailsServiceImpl userDetailsService) {
     this.userRepository = userRepository;
     this.userConverter = userConverter;
+      this.userDetailsService = userDetailsService;
   }
+
+
+    public UserModel getOrCreateUser(String email) {
+
+        Optional<UserEntity> userEntityOpt =
+                userRepository.findOneByEmail(email);
+
+        final UserEntity user =  userEntityOpt.
+                orElseGet(() -> createUser(email));
+
+        return userConverter.convertToModel(user);
+    }
+
+    public UserModel getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
+
+        Optional<UserEntity> userEntityOpt =
+                userRepository.findOneByEmail(oAuth2UserInfo.getEmail());
+
+        final UserEntity user =  userEntityOpt.
+                orElseGet(() -> createUser(oAuth2UserInfo));
+
+        return userConverter.convertToModel(user);
+    }
+
+
+
+    public void registerAndLoginUser(String userEmail, String userPassword) {
+        UserEntity userEntity = createUser(userEmail, userPassword);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEntity.getEmail());
+
+        Authentication authentication = new
+                UsernamePasswordAuthenticationToken(
+                userDetails,
+                userEntity.getPassword(),
+                userDetails.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private UserEntity createUser(String email) {
+        return this.createUser(email, null);
+    }
+
+    private UserEntity createUser(String userEmail, String userPassword) {
+        LOGGER.info("Creating a new user with email [PROTECTED].");
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail(userEmail);
+        if (userPassword != null) {
+            userEntity.setPassword(PasswordEncoder.hashPassword(userPassword));
+        }
+
+        RoleEntity userRole = new RoleEntity().setRole("ROLE_USER");
+        userEntity.setRoles(List.of(userRole));
+
+        return userRepository.save(userEntity);
+    }
+
+    private UserEntity createUser(OAuth2UserInfo oAuth2UserInfo) {
+        LOGGER.info("Creating a new user with email [PROTECTED].");
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail(oAuth2UserInfo.getEmail());
+        userEntity.setImage(oAuth2UserInfo.getImageUrl());
+
+        RoleEntity userRole = new RoleEntity().setRole("ROLE_USER");
+        userEntity.setRoles(List.of(userRole));
+
+        return userRepository.save(userEntity);
+    }
 
   @Override
   public UserModel registerUser(final UserModel model) {
-    log.info("Register user BEGIN: {}", model);
+        LOGGER.info("Register user BEGIN: {}", model);
 
         model.setPassword(PasswordEncoder.hashPassword(model.getPassword()));
 
-        final User user = userConverter.convertToEntity(model);
+        final UserEntity user = userConverter.convertToEntity(model);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
 
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        Set<ConstraintViolation<UserEntity>> violations = validator.validate(user);
 
         if(!violations.isEmpty()) {
           throw new HttpBadRequestException(violations.stream().findFirst().get().getMessage());
         }
 
-        final Optional<User> userOpt = userRepository
-              .findByUsername(user.getUsername());
+        final Optional<UserEntity> userOpt = userRepository
+              .findOneByEmail(user.getEmail());
 
         if(userOpt.isPresent()) {
-          throw new HttpBadRequestException(String.format("Username '%s' already exists", user.getUsername()));
+          throw new HttpBadRequestException(String.format("Email {} already exists", user.getEmail()));
         };
-        final User saved = userRepository.save(user);
+        final UserEntity saved = userRepository.save(user);
 
-        log.info("Register user END: {}", saved);
+        LOGGER.info("Register user END: {}", saved);
 
-        final UserModel created = userConverter.convertToModel(saved);
-
-        return created;
+        return userConverter.convertToModel(saved);
   }
 
-  @Override
-  public LoginResponse loginUser(final String username, final String password) {
-    log.info("Login user BEGIN: {}", username);
+    public UserModel getUserInfoByEmail(String email) {
+      UserEntity user = getUser(email);
 
-    final User user = getUser(username);
+      if(user != null) {
+          return userConverter.convertToModel(user);
+      }
 
-    if(user == null) {
-      throw new HttpBadRequestException("Wrong username");
-    }
-    if (!PasswordEncoder.checkPassword(password, user.getPassword())) {
-      throw new HttpBadRequestException("Wrong password");
+      throw new HttpUnauthorizedException("Server error");
     }
 
-    final String jwtToken = JWT.create()
-        .withSubject(username)
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
-
-    final UserModel userModel = userConverter.convertToModel(user);
-
-    final LoginResponse response = new LoginResponse(userModel, jwtToken);
-
-    log.info("Login user END: {}", response);
-
-    return response;
-  }
-
-    @Override
-    public UsernameCheckResponse checkUsername(String username) {
-        final Optional<User> userOpt = userRepository
-                .findByUsername(username);
-
-        if(userOpt.isPresent()) {
-            User user = userOpt.get();
-            return new UsernameCheckResponse(user.getUsername(), true, String.format("'%s' is already taken", user.getUsername()));
-        };
-
-        return new UsernameCheckResponse(username, false, "");
-
-    }
-
-    @Override
-    public void joinGroup(String groupId) {
-
-    }
-
-    private User getUser(final String username) {
-        final Optional<User> userOpt = userRepository
-            .findByUsername(username);
+    private UserEntity getUser(final String email) {
+        final Optional<UserEntity> userOpt = userRepository
+            .findOneByEmail(email);
 
         return userOpt.orElse(null);
       }
-
 }

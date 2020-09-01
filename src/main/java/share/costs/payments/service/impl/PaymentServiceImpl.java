@@ -15,7 +15,7 @@ import share.costs.payments.model.UserInPaymentModel;
 import share.costs.payments.rest.PaymentRequest;
 import share.costs.payments.service.PaymentService;
 import share.costs.payments.service.converters.UserInPaymentConverter;
-import share.costs.users.entities.User;
+import share.costs.users.entities.UserEntity;
 import share.costs.users.entities.UserRepository;
 
 import java.math.BigDecimal;
@@ -53,17 +53,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void makePayment(PaymentRequest paymentRequest, String username) {
-
-        if(!userRepository.existsUserByUsername(username)) {
-            throw  new HttpBadRequestException("User entity does not exist for username: " + username);
-        }
+    public void makePayment(PaymentRequest paymentRequest, String email) {
 
         if(!groupsRepository.existsById(paymentRequest.getGroupId())) {
             throw  new HttpBadRequestException("Group entity does not exist for id: " + paymentRequest.getGroupId());
         }
 
-        final User user = userRepository.findByUsername(username).get();
+        final UserEntity user = userRepository.findOneByEmail(email).get();
         final Group group = groupsRepository.findById(paymentRequest.getGroupId()).get();
 
         if(!group.getUsers().contains(user)) {

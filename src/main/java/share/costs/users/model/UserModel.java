@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import share.costs.users.entities.RoleEntity;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -13,8 +14,6 @@ import java.math.BigDecimal;
 public class UserModel {
 
   private String id;
-
-  private String username;
 
   @ToString.Exclude
   private String password;
@@ -25,4 +24,6 @@ public class UserModel {
 
   @ToString.Exclude
   private String email;
+
+  private List<RoleEntity> roles;
 }

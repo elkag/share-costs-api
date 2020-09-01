@@ -17,7 +17,7 @@ import share.costs.groups.service.GroupService;
 import share.costs.groups.service.converters.GroupConverter;
 import share.costs.users.entities.PendingUser;
 import share.costs.users.entities.PendingUserRepository;
-import share.costs.users.entities.User;
+import share.costs.users.entities.UserEntity;
 import share.costs.users.entities.UserRepository;
 import share.costs.users.model.GroupUserModel;
 import share.costs.users.model.UserModel;
@@ -84,14 +84,10 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
-    public List<GroupModel> getUserGroups(String username) {
-        log.info("Get group BEGIN: {} -> ", username);
+    public List<GroupModel> getUserGroups(String email) {
+        log.info("Get group BEGIN: {} -> ", email);
 
-        if (!userRepository.existsUserByUsername(username)) {
-            throw new HttpBadRequestException("User entity does not exist for id: " + username);
-        }
-
-        final User user = userRepository.findByUsername(username).get();
+        final UserEntity user = userRepository.findOneByEmail(email).get();
 
         final List<Group> groups = groupRepository.findGroupsByUsersId(user.getId());
         final List<Group> pendingGroups = groupRepository.findGroupsByPendingUsersUserId(user.getId());
@@ -121,17 +117,17 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
-    public GroupModel createGroup(CreateGroupRequest createGroupRequest, String username) {
+    public GroupModel createGroup(CreateGroupRequest createGroupRequest, String email) {
 
         log.info("Create group BEGIN: {} -> %s user: %s", createGroupRequest);
 
-        Optional<User> ownerOpt = userRepository.findByUsername(username);
+        Optional<UserEntity> ownerOpt = userRepository.findOneByEmail(email);
 
         if( !ownerOpt.isPresent() ) {
-            throw new HttpBadRequestException("User entity does not exist for username:" + username);
+            throw new HttpBadRequestException("User entity does not exist for username:" + email);
         }
 
-        final User owner = ownerOpt.get();
+        final UserEntity owner = ownerOpt.get();
         final Group group = new Group();
         group.setOwner(owner);
         group.setName(createGroupRequest.getName());
@@ -160,7 +156,7 @@ public class GroupServiceImpl implements GroupService {
         }
         List<UserModel> users = new ArrayList<>();
 
-        List<User> existsUsers = groupRepository.findById(groupId).get().getUsers();
+        List<UserEntity> existsUsers = groupRepository.findById(groupId).get().getUsers();
 
         Group g = groupRepository.findById(groupId).get();
 
@@ -179,13 +175,6 @@ public class GroupServiceImpl implements GroupService {
                 .filter(value -> !users.contains(value))
                 .forEach(users::add);
 
-        (userRepository.findByUsernameIgnoreCaseStartsWith(searchValue)).stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(u -> !existsUsers.contains(u))
-                .map(userConverter::convertToModel)
-                .filter(value -> !users.contains(value))
-                .forEach(users::add);
 
         (userRepository.findByEmailIgnoreCaseContains(searchValue)).stream()
                 .filter(Optional::isPresent)
@@ -214,7 +203,7 @@ public class GroupServiceImpl implements GroupService {
         final Group group = groupRepository.findById(groupId).get();
         log.info("Create update BEGIN: {} -> ", group);
 
-        final User user = userRepository.findById(userId).get();
+        final UserEntity user = userRepository.findById(userId).get();
 
         final List<PendingUser> pendings = group.getPendingUsers().stream().filter(u -> !u.getUser().getId().equals(user.getId())).collect(Collectors.toList());
 
@@ -239,7 +228,7 @@ public class GroupServiceImpl implements GroupService {
         final Group group = groupRepository.findById(groupId).get();
         log.info("Update BEGIN: {} -> ", group);
 
-        final User user = userRepository.findById(userId).get();
+        final UserEntity user = userRepository.findById(userId).get();
         final boolean isExist;
         isExist = group.getPendingUsers().contains(user);
         if(!isExist) {
@@ -257,19 +246,15 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
-    public GroupModel joinGroup(String groupId, String username ){
+    public GroupModel joinGroup(String groupId, String email ){
         if (!groupRepository.existsById(groupId)) {
             throw new HttpBadRequestException("Group entity does not exist for id: " + groupId);
-        }
-
-        if(!userRepository.existsUserByUsername(username)) {
-            throw new HttpBadRequestException("User entity does not exist for username: " + username);
         }
 
         final Group group = groupRepository.findById(groupId).get();
         log.info("Join to group BEGIN: {} -> ", group);
 
-        final User user = userRepository.findByUsername(username).get();
+        final UserEntity user = userRepository.findOneByEmail(email).get();
         log.info("Joining to group new user: {} -> ", user);
 
         final List<PendingUser> pendingList = pendingUserRepository.findByUserId(user.getId());
@@ -300,7 +285,7 @@ public class GroupServiceImpl implements GroupService {
      * @param group Group entity
      */
     @Transactional
-    private void createBalance(User user, Group group) {
+    private void createBalance(UserEntity user, Group group) {
         GroupUserBalance balance = new GroupUserBalance();
         balance.setUser(user);
         balance.setGroup(group);

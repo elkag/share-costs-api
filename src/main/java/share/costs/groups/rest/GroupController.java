@@ -1,12 +1,14 @@
 package share.costs.groups.rest;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import share.costs.groups.model.GroupModel;
 import share.costs.groups.service.GroupService;
 import share.costs.users.model.UserModel;
+import share.costs.users.rest.LoginResponse;
 
 import java.util.List;
 

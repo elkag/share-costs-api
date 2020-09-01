@@ -6,7 +6,7 @@ import share.costs.constants.Constants;
 import static share.costs.groups.constants.GroupConstants.GROUP_STATUS_ACTIVE;
 
 import share.costs.users.entities.PendingUser;
-import share.costs.users.entities.User;
+import share.costs.users.entities.UserEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -45,7 +45,7 @@ public class Group {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner", nullable = false,
             foreignKey = @ForeignKey(name = "fk_bunches_users"))
-    private User owner;
+    private UserEntity owner;
 
     @OneToMany(mappedBy = "group", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<GroupUserBalance> groupUserBalances;
@@ -64,7 +64,7 @@ public class Group {
                     foreignKey = @ForeignKey(name = "fk_bunch_users_bunches"))},
             inverseJoinColumns = {@JoinColumn(name = "bunch_user_id", nullable = false,
                     foreignKey = @ForeignKey(name = "fk_bunch_users_users"))})
-    private List<User> users = new ArrayList<User>();
+    private List<UserEntity> users = new ArrayList<UserEntity>();
 
 
 }

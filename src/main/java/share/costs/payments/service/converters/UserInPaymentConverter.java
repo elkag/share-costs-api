@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import share.costs.exceptions.HttpBadRequestException;
 import share.costs.payments.entities.UserInPayment;
 import share.costs.payments.model.UserInPaymentModel;
-import share.costs.users.entities.User;
+import share.costs.users.entities.UserEntity;
 import share.costs.users.entities.UserRepository;
 
 import java.math.BigDecimal;
@@ -23,7 +23,7 @@ public class UserInPaymentConverter {
             throw  new HttpBadRequestException("User entity does not exist for ID " + userInPaymentModel.getId());
         }
 
-        User user = userRepository.findById(userInPaymentModel.getUserId()).get();
+        UserEntity user = userRepository.findById(userInPaymentModel.getUserId()).get();
 
         UserInPayment entity = new UserInPayment();
         entity.setId(userInPaymentModel.getId());

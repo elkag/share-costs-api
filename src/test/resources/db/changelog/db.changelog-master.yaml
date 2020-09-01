@@ -1,0 +1,5 @@
+databaseChangeLog:
+      - includeAll:
+              path: classpath*:db/changelog/
+      - include:
+              file: db/changelog/db.changelog-2020-05-23-users.yaml

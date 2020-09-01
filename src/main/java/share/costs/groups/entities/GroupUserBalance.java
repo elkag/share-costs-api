@@ -5,8 +5,7 @@ import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import share.costs.balances.entities.Balance;
 import share.costs.constants.Constants;
-import share.costs.groups.entities.Group;
-import share.costs.users.entities.User;
+import share.costs.users.entities.UserEntity;
 
 import javax.persistence.*;
 
@@ -24,7 +23,7 @@ public class GroupUserBalance {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "user_id")
     @ToString.Exclude
-    private User user;
+    private UserEntity user;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "balance_id")

@@ -1,21 +1,17 @@
 package share.costs.users.service;
 
-import share.costs.groups.model.GroupModel;
-import share.costs.users.entities.User;
 import share.costs.users.model.UserModel;
-import share.costs.users.rest.LoginResponse;
-import share.costs.users.rest.UsernameCheckResponse;
-
-import java.util.List;
+import share.costs.users.oauth2.userInfo.OAuth2UserInfo;
 
 public interface UserService {
 
+  UserModel getOrCreateUser(String email);
+
+  UserModel getOrCreateUser(OAuth2UserInfo oAuth2UserInfo);
+
   UserModel registerUser(UserModel model);
 
-  LoginResponse loginUser(String username, String password);
+  UserModel getUserInfoByEmail(String email);
 
-  UsernameCheckResponse checkUsername(String username);
-
-  void joinGroup(String groupId);
 
 }
