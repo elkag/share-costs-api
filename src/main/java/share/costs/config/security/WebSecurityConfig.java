@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import share.costs.config.security.jwt.JWTAuthorizationFilter;
 import org.springframework.http.HttpMethod;
@@ -17,7 +18,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import share.costs.users.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import share.costs.users.oauth2.OAuth2AuthenticationFailureHandler;
 import share.costs.users.oauth2.OAuth2AuthenticationSuccessHandler;
-import share.costs.users.oauth2.services.CustomOAuth2UserServiceImpl;
 import share.costs.users.auth.RestAuthenticationEntryPoint;
 
 import static share.costs.config.security.SecurityConstants.STATS_URL;
@@ -37,7 +37,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   private final PasswordEncoder passwordEncoder;
   private final OAuth2AuthenticationSuccessHandler successHandler;
   private final OAuth2AuthenticationFailureHandler failureHandler;
-  private final CustomOAuth2UserServiceImpl oAuth2UserService;
 
   @Bean(BeanIds.AUTHENTICATION_MANAGER)
   @Override
@@ -82,15 +81,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .redirectionEndpoint().baseUri("/oauth2/callback/*")
             .and()
-            .userInfoEndpoint().userService(oAuth2UserService)
-            .and()
             .successHandler(successHandler)
             .failureHandler(failureHandler);
 
     http.addFilter(new JWTAuthorizationFilter(authenticationManager()));
   }
 
-  
+
 
   @Override
   public void configure(final WebSecurity web) {

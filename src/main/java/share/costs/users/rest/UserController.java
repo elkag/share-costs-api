@@ -39,7 +39,7 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity loginUser(@RequestBody final LoginRequest request) throws Exception {
+  public ResponseEntity loginUser(@RequestBody final LoginRequest request) {
     Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));;
 
     SecurityContextHolder.getContext().setAuthentication(authentication);

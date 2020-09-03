@@ -2,19 +2,24 @@ package share.costs.users.oauth2;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import share.costs.config.AppProperties;
 import share.costs.config.security.SecurityConstants;
 import share.costs.exceptions.HttpBadRequestException;
-import share.costs.users.UserPrincipal;
+import share.costs.users.auth.UserDetailsService;
+import share.costs.users.model.UserModel;
 import share.costs.users.oauth2.utils.CookieUtils;
+import share.costs.users.service.UserService;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -27,29 +32,53 @@ import java.util.Optional;
 import static share.costs.users.oauth2.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Component
-public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final AppProperties appProperties;
+    private final UserService userService;
+    private final UserDetailsService userDetailsService;
 
-    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+    //private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    public OAuth2AuthenticationSuccessHandler(AppProperties appProperties, HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository) {
+    public OAuth2AuthenticationSuccessHandler(AppProperties appProperties, UserService userService, UserDetailsService userDetailsService, HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository) {
         this.appProperties = appProperties;
-        this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
+        this.userService = userService;
+        this.userDetailsService = userDetailsService;
+        //this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        String targetUrl = determineTargetUrl(request, response, authentication);
 
-        if (response.isCommitted()) {
-            logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
-            return;
+        if(authentication instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken)authentication;
+
+            String email = oAuth2AuthenticationToken
+                    .getPrincipal()
+                    .getAttribute("email");
+
+            UserModel user = userService.getOrCreateUser(email);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+            authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String targetUrl = determineTargetUrl(request, response, authentication);
+
+            if (response.isCommitted()) {
+                logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
+                return;
+            }
+            clearAuthenticationAttributes(request, response);
+
+            //request.getRequestDispatcher(targetUrl).forward(request, response);
+            response.setStatus(HttpStatus.PERMANENT_REDIRECT.value());
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
         }
-        clearAuthenticationAttributes(request, response);
-
-        response.addCookie(new Cookie("TEST-COOKIE", "secret"));
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -62,10 +91,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-
         final String jwtToken = JWT.create()
-                .withSubject(userPrincipal.getEmail())
+                .withSubject(((UserDetails)authentication.getPrincipal()).getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
@@ -78,7 +105,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
         super.clearAuthenticationAttributes(request);
-        httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
     }
 
     private boolean isAuthorizedRedirectUri(String uri) {
