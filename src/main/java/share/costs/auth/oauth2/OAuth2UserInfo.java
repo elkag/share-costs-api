@@ -1,4 +1,4 @@
-package share.costs.users.oauth2.userInfo;
+package share.costs.auth.oauth2;
 
 import java.util.Map;
 
@@ -15,7 +15,9 @@ public abstract class OAuth2UserInfo {
 
     public abstract String getId();
 
-    public abstract String getName();
+    public abstract String getFirstName();
+
+    public abstract String getLastName();
 
     public abstract String getEmail();
 

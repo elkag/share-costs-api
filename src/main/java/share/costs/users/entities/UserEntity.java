@@ -61,9 +61,9 @@ public class UserEntity {
           orphanRemoval = true,
           fetch = FetchType.EAGER)
   @JoinColumn(name="user_id")
-  private List<RoleEntity> roles;
+  private List<AuthorityEntity> roles;
 
-  public UserEntity setRoles(List<RoleEntity> roles) {
+  public UserEntity setRoles(List<AuthorityEntity> roles) {
     this.roles = roles;
     return this;
   }

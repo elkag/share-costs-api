@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import share.costs.config.security.PasswordEncoder;
-import share.costs.users.entities.RoleEntity;
+import share.costs.users.entities.AuthorityEntity;
 import share.costs.users.entities.UserEntity;
 import share.costs.users.entities.UserRepository;
 
@@ -31,8 +31,8 @@ public class ApplicationBootstrap implements CommandLineRunner {
             userEntity.setLastName("Ganeva");
             userEntity.setPassword(PasswordEncoder.hashPassword("admin"));
 
-            RoleEntity adminRole = new RoleEntity().setRole("ROLE_ADMIN");
-            RoleEntity userRole = new RoleEntity().setRole("ROLE_USER");
+            AuthorityEntity adminRole = new AuthorityEntity().setRole("ROLE_ADMIN");
+            AuthorityEntity userRole = new AuthorityEntity().setRole("ROLE_USER");
             userEntity.setRoles(List.of(adminRole, userRole));
 
             userRepository.save(userEntity);

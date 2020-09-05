@@ -1,12 +1,16 @@
 package share.costs.payments.rest;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import share.costs.payments.service.PaymentService;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/payment")
+@PreAuthorize("hasRole('USER')")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -16,9 +20,7 @@ public class PaymentController {
     }
 
     @PostMapping("/make-payment")
-    public void makePayment(@RequestBody final PaymentRequest paymentRequest) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        paymentService.makePayment(paymentRequest, username);
+    public void makePayment(@RequestBody final PaymentRequest paymentRequest, Principal principal) {
+        paymentService.makePayment(paymentRequest, principal.getName());
     }
 }

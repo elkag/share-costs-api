@@ -12,7 +12,6 @@ import share.costs.users.entities.UserEntity;
 public class GroupUserConverter {
 
     public final GroupUserModel convertToModel(PendingUser user) {
-
         final GroupUserModel model = new GroupUserModel();
         model.setId(user.getUser().getId());
         model.setUsername(user.getUser().getEmail());

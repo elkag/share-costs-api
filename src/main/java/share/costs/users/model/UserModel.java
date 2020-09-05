@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import share.costs.users.entities.RoleEntity;
+import share.costs.users.entities.AuthorityEntity;
 
 import java.util.List;
 
@@ -25,5 +25,5 @@ public class UserModel {
   @ToString.Exclude
   private String email;
 
-  private List<RoleEntity> roles;
+  private List<AuthorityEntity> roles;
 }
