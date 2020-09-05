@@ -1,9 +1,10 @@
-package share.costs.users.auth;
+package share.costs.auth.service;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import share.costs.users.entities.UserEntity;
@@ -34,8 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         List<GrantedAuthority> authorities = userEntity.getRoles().stream()
                 .map(r -> new SimpleGrantedAuthority(r.getRole()))
                 .collect(Collectors.toList());
-        User result = new User(userEntity.getEmail(), userEntity.getPassword(), authorities);
 
-        return result;
+        return new User(userEntity.getEmail(), userEntity.getPassword(), authorities);
     }
 }

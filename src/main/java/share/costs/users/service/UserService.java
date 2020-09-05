@@ -1,17 +1,15 @@
 package share.costs.users.service;
 
+import share.costs.users.entities.UserEntity;
 import share.costs.users.model.UserModel;
-import share.costs.users.oauth2.userInfo.OAuth2UserInfo;
 
 public interface UserService {
 
   UserModel getOrCreateUser(String email);
 
-  UserModel getOrCreateUser(OAuth2UserInfo oAuth2UserInfo);
+  UserEntity getUser(final String email);
 
   UserModel registerUser(UserModel model);
 
-  UserModel getUserInfoByEmail(String email);
-
-
+  UserModel validateAndLogFacebookUser(String accessToken);
 }

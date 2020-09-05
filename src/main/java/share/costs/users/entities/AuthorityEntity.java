@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name="roles")
-public class RoleEntity {
+public class AuthorityEntity {
 
     @Id
     @GeneratedValue(generator = "uuid")
@@ -22,7 +22,7 @@ public class RoleEntity {
     @Column(nullable = false)
     private String role;
 
-    public RoleEntity setRole(String role) {
+    public AuthorityEntity setRole(String role) {
         this.role = role;
         return this;
     }

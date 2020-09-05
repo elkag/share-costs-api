@@ -6,38 +6,46 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import share.costs.auth.service.UserDetailsServiceImpl;
+import share.costs.config.SocialLoginProperties;
 import share.costs.exceptions.HttpBadRequestException;
-import share.costs.exceptions.HttpUnauthorizedException;
-import share.costs.users.auth.UserDetailsServiceImpl;
-import share.costs.users.entities.RoleEntity;
+import share.costs.auth.oauth2.OAuth2UserInfo;
+import share.costs.auth.oauth2.OAuth2UserInfoFactory;
+import share.costs.auth.oauth2.SocialAuthProvider;
+import share.costs.users.entities.AuthorityEntity;
 import share.costs.users.entities.UserEntity;
 import share.costs.users.entities.UserRepository;
 import share.costs.users.model.UserModel;
 import org.springframework.stereotype.Service;
 import share.costs.config.security.PasswordEncoder;
-import share.costs.users.oauth2.userInfo.OAuth2UserInfo;
-import share.costs.users.auth.UserDetailsService;
 import share.costs.users.service.converters.UserConverter;
 import share.costs.users.service.UserService;
 
 import javax.validation.*;
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 @Service
 public class UserServiceImpl implements UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
-  private final UserRepository userRepository;
-  private final UserConverter userConverter;
-  private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
+    private final UserConverter userConverter;
+    private final UserDetailsService userDetailsService;
+    private final SocialLoginProperties socialLoginProperties;
 
-  public UserServiceImpl(final UserRepository userRepository,
-                         final UserConverter userConverter, UserDetailsServiceImpl userDetailsService) {
-    this.userRepository = userRepository;
-    this.userConverter = userConverter;
-      this.userDetailsService = userDetailsService;
-  }
+    public UserServiceImpl(final UserRepository userRepository,
+                           final UserConverter userConverter, UserDetailsServiceImpl userDetailsService, SocialLoginProperties socialLoginProperties) {
+        this.userRepository = userRepository;
+        this.userConverter = userConverter;
+        this.userDetailsService = userDetailsService;
+        this.socialLoginProperties = socialLoginProperties;
+    }
 
 
     public UserModel getOrCreateUser(String email) {
@@ -51,18 +59,26 @@ public class UserServiceImpl implements UserService {
         return userConverter.convertToModel(user);
     }
 
-    public UserModel getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
+    public UserModel getOrCreateFacebookUser(OAuth2UserInfo oAuth2UserInfo) {
 
         Optional<UserEntity> userEntityOpt =
                 userRepository.findOneByEmail(oAuth2UserInfo.getEmail());
 
         final UserEntity user =  userEntityOpt.
-                orElseGet(() -> createUser(oAuth2UserInfo));
+                orElseGet(() -> createUser(oAuth2UserInfo.getEmail()));
 
-        return userConverter.convertToModel(user);
+        final UserEntity updated = updateUser(user, oAuth2UserInfo);
+
+        return userConverter.convertToModel(updated);
     }
 
+    private UserEntity updateUser(UserEntity userEntity, OAuth2UserInfo facebookInfo) {
+        userEntity.setImage(facebookInfo.getImageUrl());
+        userEntity.setFirstName(facebookInfo.getFirstName());
+        userEntity.setLastName(facebookInfo.getLastName());
 
+        return userRepository.save(userEntity);
+    }
 
     public void registerAndLoginUser(String userEmail, String userPassword) {
         UserEntity userEntity = createUser(userEmail, userPassword);
@@ -83,6 +99,7 @@ public class UserServiceImpl implements UserService {
         return this.createUser(email, null);
     }
 
+
     private UserEntity createUser(String userEmail, String userPassword) {
         LOGGER.info("Creating a new user with email [PROTECTED].");
 
@@ -92,20 +109,7 @@ public class UserServiceImpl implements UserService {
             userEntity.setPassword(PasswordEncoder.hashPassword(userPassword));
         }
 
-        RoleEntity userRole = new RoleEntity().setRole("ROLE_USER");
-        userEntity.setRoles(List.of(userRole));
-
-        return userRepository.save(userEntity);
-    }
-
-    private UserEntity createUser(OAuth2UserInfo oAuth2UserInfo) {
-        LOGGER.info("Creating a new user with email [PROTECTED].");
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(oAuth2UserInfo.getEmail());
-        userEntity.setImage(oAuth2UserInfo.getImageUrl());
-
-        RoleEntity userRole = new RoleEntity().setRole("ROLE_USER");
+        AuthorityEntity userRole = new AuthorityEntity().setRole("ROLE_USER");
         userEntity.setRoles(List.of(userRole));
 
         return userRepository.save(userEntity);
@@ -118,6 +122,9 @@ public class UserServiceImpl implements UserService {
         model.setPassword(PasswordEncoder.hashPassword(model.getPassword()));
 
         final UserEntity user = userConverter.convertToEntity(model);
+
+        AuthorityEntity userRole = new AuthorityEntity().setRole("ROLE_USER");
+        user.setRoles(List.of(userRole));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
@@ -141,17 +148,35 @@ public class UserServiceImpl implements UserService {
         return userConverter.convertToModel(saved);
   }
 
-    public UserModel getUserInfoByEmail(String email) {
-      UserEntity user = getUser(email);
+    @Override
+    public UserModel validateAndLogFacebookUser(String accessToken) {
 
-      if(user != null) {
-          return userConverter.convertToModel(user);
-      }
+        RestTemplate restTemplate = new RestTemplate();
 
-      throw new HttpUnauthorizedException("Server error");
+        Map<String, Object> attributes = null;
+
+        final String fields = "id,email,first_name,last_name,picture";
+        try {
+
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(socialLoginProperties.getUserInfoUri())
+                .queryParam("access_token", accessToken).queryParam("fields", fields);
+
+            attributes = restTemplate.getForObject(uriBuilder.toUriString(), Map.class);
+
+            OAuth2UserInfo oAuth2UserInfo =
+                    OAuth2UserInfoFactory.getOAuth2UserInfo(SocialAuthProvider.FACEBOOK, attributes);
+
+            return getOrCreateFacebookUser(oAuth2UserInfo);
+
+        } catch (HttpClientErrorException e) {
+            throw new HttpBadRequestException("Invalid access token");
+        } catch (Exception exp) {
+            throw new HttpBadRequestException("Invalid user");
+        }
     }
 
-    private UserEntity getUser(final String email) {
+    @Override
+    public UserEntity getUser(final String email) {
         final Optional<UserEntity> userOpt = userRepository
             .findOneByEmail(email);
 

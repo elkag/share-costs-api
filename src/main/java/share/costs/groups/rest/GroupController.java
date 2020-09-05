@@ -1,20 +1,19 @@
 package share.costs.groups.rest;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import share.costs.groups.model.GroupModel;
 import share.costs.groups.service.GroupService;
 import share.costs.users.model.UserModel;
-import share.costs.users.rest.LoginResponse;
 
+import java.security.Principal;
 import java.util.List;
 
 @Log4j2
 @RestController
 @RequestMapping("/groups")
+@PreAuthorize("hasRole('USER')")
 public class GroupController {
 
     private final GroupService groupService;
@@ -24,17 +23,13 @@ public class GroupController {
     }
 
     @PostMapping("/create")
-    public GroupModel createGroup(@RequestBody final CreateGroupRequest createGroupRequest) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return groupService.createGroup(createGroupRequest, username);
+    public GroupModel createGroup(@RequestBody final CreateGroupRequest createGroupRequest, Principal principal) {
+        return groupService.createGroup(createGroupRequest, principal.getName());
     }
 
     @PostMapping("/join")
-    public GroupModel joinGroup(@RequestParam final String groupId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return groupService.joinGroup(groupId, username);
+    public GroupModel joinGroup(@RequestParam final String groupId, Principal principal) {
+        return groupService.joinGroup(groupId, principal.getName());
     }
 
     @PostMapping("/add-user")
@@ -53,10 +48,9 @@ public class GroupController {
     }
 
     @PostMapping("/get-all")
-    public List<GroupModel> getGroups() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return groupService.getUserGroups(username);
+    public List<GroupModel> getGroups(Principal principal) {
+
+        return groupService.getUserGroups(principal.getName());
     }
 
     @GetMapping("/{userId}")
