@@ -1,18 +1,23 @@
 package share.costs.security.config;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import share.costs.config.security.PasswordEncoder;
 
-import static share.costs.config.security.PasswordEncoder.checkPassword;
-import static share.costs.config.security.PasswordEncoder.hashPassword;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class TestPasswordEncoder {
+
+  @Autowired
+  private final PasswordEncoder passwordEncoder;
+
+  public TestPasswordEncoder() {
+    this.passwordEncoder = new PasswordEncoder();
+  }
+
 
   @Test
   public void testPasswordEncoder() {
@@ -25,15 +30,15 @@ public class TestPasswordEncoder {
     System.out.println("Hashing test password...");
     System.out.println();
 
-    String computedHash = hashPassword(password);
+    String computedHash = passwordEncoder.hashPassword(password);
     System.out.println("Test computed hash: " + computedHash);
     System.out.println();
     System.out.println("Verifying that hash and stored hash both match for the test password...");
     System.out.println();
 
-    String compareTest = checkPassword(password, hash)
+    String compareTest = passwordEncoder.checkPassword(password, hash)
         ? "Passwords Match" : "Passwords do not match";
-    String compareComputed = checkPassword(password, computedHash)
+    String compareComputed = passwordEncoder.checkPassword(password, computedHash)
         ? "Passwords Match" : "Passwords do not match";
 
     System.out.println("Verify against stored hash:   " + compareTest);

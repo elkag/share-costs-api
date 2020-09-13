@@ -5,11 +5,4 @@ import share.costs.users.model.UserModel;
 
 public interface UserService {
 
-  UserModel getOrCreateUser(String email);
-
-  UserEntity getUser(final String email);
-
-  UserModel registerUser(UserModel model);
-
-  UserModel validateAndLogFacebookUser(String accessToken);
 }

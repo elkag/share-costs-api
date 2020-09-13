@@ -1,11 +1,10 @@
-package share.costs.groups.service.converters;
+package share.costs.groups.converters;
 
 import org.springframework.stereotype.Component;
 import share.costs.balances.entities.Balance;
 import share.costs.groups.entities.Group;
 import share.costs.groups.model.GroupModel;
-import share.costs.users.service.converters.GroupUserConverter;
-import share.costs.users.service.converters.UserConverter;
+import share.costs.users.converters.GroupUserConverter;
 
 import java.util.stream.Collectors;
 
@@ -16,22 +15,6 @@ public class GroupConverter {
 
     public GroupConverter(GroupUserConverter userConverter) {
         this.groupUserConverter = userConverter;
-    }
-
-    public Group convertToEntity(GroupModel model) {
-        if(model == null) {
-            return null;
-        }
-        final Group group = new Group();
-        group.setId(model.getId());
-        group.setName(model.getName());
-        //group.setOwner(groupUserConverter.convertToEntity(model.getOwner()));
-        /*group.setUsers(model.getUsers().stream()
-                .map(userModel -> userConverter.convertToEntity(userModel))
-                .collect(Collectors.toList()));*/
-
-
-        return group;
     }
 
     public GroupModel convertToModel(Group group) {
@@ -47,7 +30,7 @@ public class GroupConverter {
         model.setStatus(group.getStatus());
         model.setBalance(group.getBalance());
         model.setPendingUsers(group.getPendingUsers().stream()
-                .map(user -> groupUserConverter.convertToModel(user))
+                .map(groupUserConverter::convertToModel)
                 .collect(Collectors.toList()));
 
         model.setUsers(group.getUsers().stream()

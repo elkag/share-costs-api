@@ -1,12 +1,15 @@
 package share.costs.groups.rest;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import share.costs.groups.model.GroupModel;
 import share.costs.groups.service.GroupService;
 import share.costs.users.model.UserModel;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
@@ -23,8 +26,12 @@ public class GroupController {
     }
 
     @PostMapping("/create")
-    public GroupModel createGroup(@RequestBody final CreateGroupRequest createGroupRequest, Principal principal) {
-        return groupService.createGroup(createGroupRequest, principal.getName());
+    public ResponseEntity<GroupModel> createGroup(@Valid @RequestBody final CreateGroupRequest createGroupRequest, Principal principal) {
+        ResponseEntity<GroupModel> response = new ResponseEntity<GroupModel>(
+                groupService.createGroup(createGroupRequest, principal.getName()),
+                HttpStatus.CREATED);
+
+        return response;
     }
 
     @PostMapping("/join")
@@ -50,12 +57,12 @@ public class GroupController {
     @PostMapping("/get-all")
     public List<GroupModel> getGroups(Principal principal) {
 
-        return groupService.getUserGroups(principal.getName());
+        return groupService.findUserGroups(principal.getName());
     }
 
     @GetMapping("/{userId}")
     public List<GroupModel> getUserGroups(@PathVariable String userId) {
-        return groupService.getUserGroups(userId);
+        return groupService.findUserGroups(userId);
     }
 
     @PostMapping("/find-new-members")

@@ -1,4 +1,4 @@
-package share.costs.users.model;
+package share.costs.auth.model;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;

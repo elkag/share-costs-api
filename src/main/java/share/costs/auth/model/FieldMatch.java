@@ -1,4 +1,4 @@
-package share.costs.users.model;
+package share.costs.auth.model;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

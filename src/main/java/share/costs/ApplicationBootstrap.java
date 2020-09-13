@@ -15,27 +15,28 @@ import java.util.List;
 public class ApplicationBootstrap implements CommandLineRunner {
 
     private  final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
 
         // pre-populating the app with some demo data.
-        createUsers();
+        //createUsers();
     }
 
     private void createUsers() {
-        if(userRepository.count() == 0) {
+       /* if(userRepository.count() == 0) {
             final UserEntity userEntity = new UserEntity();
             userEntity.setEmail("elka.ganeva@gmail.com");
             userEntity.setFirstName("Elka");
             userEntity.setLastName("Ganeva");
-            userEntity.setPassword(PasswordEncoder.hashPassword("admin"));
+            userEntity.setPassword(passwordEncoder.hashPassword("admin"));
 
             AuthorityEntity adminRole = new AuthorityEntity().setRole("ROLE_ADMIN");
             AuthorityEntity userRole = new AuthorityEntity().setRole("ROLE_USER");
             userEntity.setRoles(List.of(adminRole, userRole));
 
             userRepository.save(userEntity);
-        }
+        }*/
     }
 }

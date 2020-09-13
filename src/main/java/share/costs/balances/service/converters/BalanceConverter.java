@@ -9,10 +9,6 @@ import share.costs.balances.model.BalanceModel;
 @Data
 public class BalanceConverter {
 
-    public  BalanceConverter() {
-
-    }
-
     public final BalanceModel convertToModel(final Balance balance) {
         if(balance == null) {
             return null;

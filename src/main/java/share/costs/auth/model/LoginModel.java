@@ -1,4 +1,4 @@
-package share.costs.users.model;
+package share.costs.auth.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

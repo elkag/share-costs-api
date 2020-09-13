@@ -1,4 +1,4 @@
-package share.costs.auth.service;
+package share.costs.auth.service.impl;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
