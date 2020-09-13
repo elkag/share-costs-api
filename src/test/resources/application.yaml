@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+app:
+  auth:
+    tokenSecret: ${TOKEN_SECRET:926D96C90030DD58429D2751AC1BDBBC}
+    tokenExpirationMsec: ${TOKEN_EXPIRATION_TIME:864000000}
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

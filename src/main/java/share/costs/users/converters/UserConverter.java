@@ -1,4 +1,4 @@
-package share.costs.users.service.converters;
+package share.costs.users.converters;
 
 import share.costs.users.entities.UserEntity;
 import share.costs.users.model.UserModel;

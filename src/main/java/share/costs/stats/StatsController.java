@@ -1,5 +1,6 @@
 package share.costs.stats;
 
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +16,11 @@ public class StatsController {
     }
 
     @GetMapping("/")
-    public String stats(){
-        return "Request count: " + statsService.getRequestCount() + " started on: " + statsService.getStartedOn();
+    public Model stats(Model model){
+        model.addAttribute("Count", statsService.getRequestCount());
+        model.addAttribute("StartedOn", statsService.getStartedOn());
+
+        return model;
+        //return "Request count: " + statsService.getRequestCount() + " started on: " + statsService.getStartedOn();
     }
 }

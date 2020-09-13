@@ -1,10 +1,10 @@
-package share.costs.users.service.converters;
+package share.costs.users.converters;
 
 import lombok.Data;
 import org.springframework.stereotype.Component;
 import share.costs.balances.entities.Balance;
 import share.costs.users.entities.PendingUser;
-import share.costs.users.model.GroupUserModel;
+import share.costs.auth.model.GroupUserModel;
 import share.costs.users.entities.UserEntity;
 
 @Component

@@ -8,9 +8,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import share.costs.auth.service.UserDetailsServiceImpl;
+import org.springframework.web.client.RestTemplate;
+import share.costs.auth.service.impl.UserDetailsServiceImpl;
 import share.costs.config.security.jwt.JWTAuthorizationFilter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,7 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import share.costs.auth.RestAuthenticationEntryPoint;
 
-import static share.costs.config.security.SecurityConstants.USERS_URL;
+import static share.costs.config.security.SecurityConstants.*;
 
 @AllArgsConstructor
 @Configuration
@@ -63,7 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
               .authenticationEntryPoint(new RestAuthenticationEntryPoint())
               .and()
         .authorizeRequests()
-            .antMatchers(HttpMethod.POST, USERS_URL)
+            .antMatchers(HttpMethod.POST, USERS_LOGIN_URL, USERS_REGISTER_URL)
               .permitAll()
             .antMatchers(HttpMethod.GET)
               .permitAll()

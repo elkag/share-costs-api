@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface GroupService {
 
-    GroupModel createGroup(CreateGroupRequest createGroupRequest, String username);
+    GroupModel createGroup(CreateGroupRequest createGroupRequest, String ownerEmail);
 
     GroupModel addUser(AddUserRequest request);
 
-    List<GroupModel> getUserGroups(String userId);
+    List<GroupModel> findUserGroups(String userId);
 
     GroupModel joinGroup(String groupId, String username);
 

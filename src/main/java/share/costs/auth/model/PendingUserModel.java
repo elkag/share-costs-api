@@ -1,4 +1,4 @@
-package share.costs.users.model;
+package share.costs.auth.model;
 
 import lombok.Data;
 import share.costs.users.entities.UserEntity;
