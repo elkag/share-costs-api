@@ -15,11 +15,10 @@ import java.util.List;
 @Entity
 @Table(name="payments")
 public class Payment {
+
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", length = Constants.UUID_SIZE)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount = BigDecimal.ZERO;

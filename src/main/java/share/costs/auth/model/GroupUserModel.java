@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 public class GroupUserModel {
-    private String id;
+    private Long id;
 
     private String username;
 

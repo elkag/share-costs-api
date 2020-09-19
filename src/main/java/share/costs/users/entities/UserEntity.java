@@ -21,17 +21,15 @@ import java.util.List;
 public class UserEntity {
 
   @Id
-  @GeneratedValue(generator = "uuid")
-  @GenericGenerator(name = "uuid", strategy = "uuid2")
-  @Column(name = "id", length = Constants.UUID_SIZE)
-  private String id;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   @Column(nullable = false)
   @NotNull(message = "Email cannot be null")
   @Email(message = "Invalid email")
   private String email;
 
-  @Column(nullable = false)
+  @Column
   @ToString.Exclude
   private String password;
 
@@ -57,9 +55,9 @@ public class UserEntity {
   private List<GroupUserBalance> groupUserBalances;
 
   @OneToMany(
+          fetch = FetchType.EAGER,
           cascade = CascadeType.ALL,
-          orphanRemoval = true,
-          fetch = FetchType.EAGER)
+          orphanRemoval = true)
   @JoinColumn(name="user_id")
   private List<AuthorityEntity> roles;
 

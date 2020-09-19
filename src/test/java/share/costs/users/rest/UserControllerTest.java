@@ -41,7 +41,7 @@ public class UserControllerTest {
     @Autowired
     HttpServletResponse response;
 
-    private String USER1_ID, USER2_ID;
+    private Long USER1_ID, USER2_ID;
     private String USER1_EMAIL="user1@email.com", USER2_EMAIL="user2@email.com";
     private String USER1_FNAME="John", USER2_FNAME="Anna";
     private String USER1_LNAME="Smith", USER2_LNAME="Lenard";

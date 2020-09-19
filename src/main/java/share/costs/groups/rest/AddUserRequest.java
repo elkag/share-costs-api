@@ -8,24 +8,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AddUserRequest {
 
-    String groupId;
+    Long groupId;
 
-    String userId;
+    Long userId;
 
-    public String getGroupId() {
+    public Long getGroupId() {
         return groupId;
     }
 
-    public AddUserRequest setGroupId(String groupId) {
+    public AddUserRequest setGroupId(Long groupId) {
         this.groupId = groupId;
         return this;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public AddUserRequest setUserId(String userId) {
+    public AddUserRequest setUserId(Long userId) {
         this.userId = userId;
         return this;
     }

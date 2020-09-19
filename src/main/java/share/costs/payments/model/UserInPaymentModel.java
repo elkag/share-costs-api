@@ -12,14 +12,14 @@ import java.math.BigDecimal;
 @Data
 public class UserInPaymentModel {
 
-    private String id;
+    private Long id;
 
     private Integer weight = 1;
 
     // Amount in cents
     private Integer amount = 0;
 
-    private String userId;
+    private Long userId;
 
     private Payment payment;
 }

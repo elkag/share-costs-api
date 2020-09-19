@@ -35,7 +35,7 @@ public class GroupController {
     }
 
     @PostMapping("/join")
-    public GroupModel joinGroup(@RequestParam final String groupId, Principal principal) {
+    public GroupModel joinGroup(@RequestParam final Long groupId, Principal principal) {
         return groupService.joinGroup(groupId, principal.getName());
     }
 
@@ -50,23 +50,22 @@ public class GroupController {
     }
 
     @PostMapping("/get")
-    public GroupModel getGroup(@RequestParam final String groupId) {
+    public GroupModel getGroup(@RequestParam final Long groupId) {
         return groupService.getGroup(groupId);
     }
 
     @PostMapping("/get-all")
-    public List<GroupModel> getGroups(Principal principal) {
-
+    public List<GroupModel> getGroups(final Principal principal) {
         return groupService.findUserGroups(principal.getName());
     }
 
     @GetMapping("/{userId}")
-    public List<GroupModel> getUserGroups(@PathVariable String userId) {
-        return groupService.findUserGroups(userId);
+    public List<GroupModel> getUserGroups(@PathVariable final Long userId) {
+        return groupService.findGroupsByUserId(userId);
     }
 
     @PostMapping("/find-new-members")
-    public List<UserModel> findUsers(@RequestParam String groupId, @RequestParam String value) {
+    public List<UserModel> findUsers(@RequestParam Long groupId, @RequestParam String value) {
         if(value.length() < 2) {
             return null;
         }

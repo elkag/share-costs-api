@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-users.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-roles.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-pending_users.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-balances.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-bunches.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-payments.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-users_in_payment.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-group_pending_users.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-group_users.yaml
+  - include:
+      file: db/changelog/db.changelog-2020-09-16-group_user_balances.yaml

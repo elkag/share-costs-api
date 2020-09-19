@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserModel {
 
-  private String id;
+  private Long id;
 
   @ToString.Exclude
   private String password;
@@ -26,11 +26,11 @@ public class UserModel {
 
   private List<AuthorityEntity> roles;
 
-  public String getId() {
+  public Long getId() {
     return id;
   }
 
-  public UserModel setId(String id) {
+  public UserModel setId(Long id) {
     this.id = id;
     return this;
   }

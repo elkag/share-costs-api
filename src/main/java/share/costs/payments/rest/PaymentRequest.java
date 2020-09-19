@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class PaymentRequest {
 
-    private String groupId;
+    private Long groupId;
 
     String description;
 

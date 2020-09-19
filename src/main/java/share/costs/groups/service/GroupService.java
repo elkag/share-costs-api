@@ -16,12 +16,14 @@ public interface GroupService {
 
     List<GroupModel> findUserGroups(String userId);
 
-    GroupModel joinGroup(String groupId, String username);
+    GroupModel joinGroup(Long groupId, String username);
 
-    GroupModel getGroup(final String groupId);
+    GroupModel getGroup(final Long groupId);
 
-    List<UserModel> findUsers(String groupId, String searchValue);
+    List<UserModel> findUsers(Long groupId, String searchValue);
 
     GroupModel removeGroupPendingUser(RemoveUserRequest request);
+
+    List<GroupModel> findGroupsByUserId(Long userId);
 }
 

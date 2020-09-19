@@ -47,7 +47,7 @@ class AuthControllerTest {
 
     private String NEW_USER_ID = "new-user-id";
     private String NON_EXISTING_USER_ID = "non-existing-user-id";
-    private String USER2_ID = "user-two-id";
+    private Long USER2_ID = 2l;
 
     @Autowired
     private UserRepository userRepository;
@@ -74,7 +74,7 @@ class AuthControllerTest {
         user1.setFirstName(USER1_FNAME);
         user1.setLastName(USER1_LNAME);
         user1.setPassword(passwordEncoder.hashPassword((USER1_PASSWORD)));
-        String USER1_ID = "user-one-id";
+        Long USER1_ID = 1l;
         user1.setId(USER1_ID);
         AuthorityEntity user1Role = new AuthorityEntity().setRole("ROLE_USER");
         user1.setRoles(List.of(user1Role));

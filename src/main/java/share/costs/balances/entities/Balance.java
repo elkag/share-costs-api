@@ -14,11 +14,10 @@ import java.util.List;
 @Entity
 @Table(name = "balances")
 public class Balance {
+
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", length = Constants.UUID_SIZE)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     // How much ows the group or the group owes to user
     @Column(name = "balance", nullable = false)

@@ -18,10 +18,8 @@ import java.math.BigDecimal;
 public class UserInPayment {
 
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @Column(name = "id", length = Constants.UUID_SIZE)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "weight", nullable = false)
     private Integer weight = 1;

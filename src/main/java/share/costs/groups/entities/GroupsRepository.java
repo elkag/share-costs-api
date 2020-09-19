@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface GroupsRepository extends JpaRepository<Group, String> {
+public interface GroupsRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findById(String id);
 
-    List<Group> findGroupsByUsersId(String userId);
+    List<Group> findGroupsByUsersId(Long userId);
 
-    List<Group> findGroupsByPendingUsersUserId(String userId);
+    List<Group> findGroupsByPendingUsersUserId(Long userId);
 }

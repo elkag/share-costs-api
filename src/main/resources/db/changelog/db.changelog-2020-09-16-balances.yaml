@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-balances-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: balances
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: balance
+                  type: decimal(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: spending
+                  type: decimal(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: costs
+                  type: decimal(19,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated
+                  type: datetime
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false

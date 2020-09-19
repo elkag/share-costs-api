@@ -5,6 +5,6 @@ import share.costs.users.entities.UserEntity;
 
 import java.util.Optional;
 
-public interface GroupUserBalanceRepository extends JpaRepository<GroupUserBalance, String> {
+public interface GroupUserBalanceRepository extends JpaRepository<GroupUserBalance, Long> {
     Optional<GroupUserBalance> findByUserAndGroup(UserEntity user, Group group);
 }

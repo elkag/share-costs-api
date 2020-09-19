@@ -67,7 +67,7 @@ public class GroupsControllerTest {
         user1.setFirstName("Owner first name");
         user1.setLastName("Owner last name");
         user1.setPassword(passwordEncoder.hashPassword("123"));
-        user1.setId("group-owner-id");
+        user1.setId(1l);
         AuthorityEntity user1Role = new AuthorityEntity().setRole("ROLE_USER");
         user1.setRoles(List.of(user1Role));
 

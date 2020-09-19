@@ -4,7 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import share.costs.balances.entities.Balance;
-import share.costs.balances.entities.BalancesRepository;
+import share.costs.balances.entities.BalanceRepository;
 import share.costs.groups.entities.GroupUserBalance;
 import share.costs.groups.entities.GroupUserBalanceRepository;
 import share.costs.exceptions.HttpBadRequestException;
@@ -30,7 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserRepository userRepository;
     private final GroupUserBalanceRepository groupUserBalanceRepository;
     private final PaymentsRepository paymentsRepository;
-    private final BalancesRepository balancesRepository;
+    private final BalanceRepository balanceRepository;
     private final UserInPaymentConverter userInPaymentConverter;
     private final UserInPaymentRepository userInPaymentRepository;
 
@@ -40,13 +40,13 @@ public class PaymentServiceImpl implements PaymentService {
                               UserRepository userRepository,
                               PaymentsRepository paymentsRepository,
                               GroupUserBalanceRepository groupUserBalanceRepository,
-                              BalancesRepository balancesRepository,
+                              BalanceRepository balanceRepository,
                               UserInPaymentConverter userInPaymentConverter, UserInPaymentRepository userInPaymentRepository) {
         this.groupsRepository = groupsRepository;
         this.userRepository = userRepository;
         this.paymentsRepository = paymentsRepository;
         this.groupUserBalanceRepository = groupUserBalanceRepository;
-        this.balancesRepository = balancesRepository;
+        this.balanceRepository = balanceRepository;
         this.userInPaymentConverter = userInPaymentConverter;
         this.userInPaymentRepository = userInPaymentRepository;
     }
@@ -117,7 +117,7 @@ public class PaymentServiceImpl implements PaymentService {
             balance.setCosts((balance.getCosts()).add(current.getAmount().negate()));
             balance.setBalance((balance.getSpending()).add(balance.getCosts()));
             gub.setBalance(balance);
-            balancesRepository.save(balance);
+            balanceRepository.save(balance);
         });
     }
 }

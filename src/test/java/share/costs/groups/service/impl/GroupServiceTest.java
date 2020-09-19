@@ -9,6 +9,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import share.costs.balances.entities.BalanceRepository;
 import share.costs.groups.converters.GroupConverter;
 import share.costs.groups.entities.Group;
 import share.costs.groups.entities.GroupUserBalanceRepository;
@@ -48,6 +49,8 @@ public class GroupServiceTest {
     private PendingUserRepository mockPendingUserRepository;
     @Mock
     private GroupUserBalanceRepository mockGroupUserBalanceRepository;
+    @Mock
+    private BalanceRepository mockBalanceRepository;
 
     @BeforeEach
     public void setUp(){
@@ -63,7 +66,8 @@ public class GroupServiceTest {
                 mockPendingUserRepository,
                 mockGroupUserBalanceRepository,
                 groupUserConverter,
-                userConverter);
+                userConverter,
+                mockBalanceRepository);
     }
 
     @Test
@@ -71,7 +75,7 @@ public class GroupServiceTest {
 
         // Arrange
         UserEntity ownerEntity = new UserEntity();
-        ownerEntity.setId("ownerId");
+        ownerEntity.setId(1l);
         ownerEntity.setEmail("owner@emailcom");
         ownerEntity.setFirstName("Owner");
         ownerEntity.setLastName("Owner");
@@ -79,7 +83,7 @@ public class GroupServiceTest {
         ownerEntity.setImage(null);
 
         UserEntity userEntity = new UserEntity();
-        ownerEntity.setId("userId");
+        ownerEntity.setId(2l);
         userEntity.setEmail("user@emailcom");
         userEntity.setFirstName("First name");
         userEntity.setLastName("Last name");
@@ -87,7 +91,7 @@ public class GroupServiceTest {
         userEntity.setImage(null);
 
         UserEntity pendingUserEntity = new UserEntity();
-        ownerEntity.setId("pendingUserId");
+        ownerEntity.setId(3l);
         pendingUserEntity.setEmail("user@emailcom");
         pendingUserEntity.setFirstName("Pending");
         pendingUserEntity.setLastName("Pending");
@@ -98,7 +102,7 @@ public class GroupServiceTest {
         pendingUser.setUser(pendingUserEntity);
 
         Group group = new Group();
-        group.setId("0");
+        group.setId(0l);
         group.setName("Group Name");
         group.setDescription("");
         group.setOwner(ownerEntity);
@@ -106,7 +110,7 @@ public class GroupServiceTest {
         group.setPendingUsers(List.of(pendingUser));
 
         Group pendingGroup = new Group();
-        pendingGroup.setId("1");
+        pendingGroup.setId(1l);
         pendingGroup.setName("Pending Group Name");
         pendingGroup.setDescription("");
         pendingGroup.setOwner(ownerEntity);
@@ -155,7 +159,7 @@ public class GroupServiceTest {
 
         // Arrange
         UserEntity ownerEntity = new UserEntity();
-        ownerEntity.setId("ownerId");
+        ownerEntity.setId(1l);
         ownerEntity.setEmail("owner@emailcom");
         ownerEntity.setFirstName("Owner");
         ownerEntity.setLastName("Owner");
@@ -188,7 +192,7 @@ public class GroupServiceTest {
 
         // Arrange
         UserEntity ownerEntity = new UserEntity();
-        ownerEntity.setId("owner-id");
+        ownerEntity.setId(1l);
         ownerEntity.setEmail("owner@emailcom");
         ownerEntity.setFirstName("Owner");
         ownerEntity.setLastName("Owner");
@@ -196,7 +200,7 @@ public class GroupServiceTest {
         ownerEntity.setImage(null);
 
         UserEntity pendingUserEntity = new UserEntity();
-        pendingUserEntity.setId("pending-user-id");
+        pendingUserEntity.setId(2l);
         pendingUserEntity.setEmail("user@emailcom");
         pendingUserEntity.setFirstName("Pending");
         pendingUserEntity.setLastName("Pending");
@@ -204,7 +208,7 @@ public class GroupServiceTest {
         pendingUserEntity.setImage(null);
 
         Group group = new Group();
-        group.setId("group-id");
+        group.setId(1l);
         group.setName("Group name");
         group.setDescription("Group description");
         group.setOwner(ownerEntity);

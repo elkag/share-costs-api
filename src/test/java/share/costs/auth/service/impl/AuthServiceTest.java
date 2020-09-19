@@ -46,8 +46,6 @@ public class AuthServiceTest {
     private final String NON_EXISTING_EMAIL = "nonExisting@Email.com";
     private final String EXISTING_USER_EMAIL = "existing@Email.com";
 
-    private final String EXISTING_USER_ID = "existing-user-id";
-
 
     @BeforeEach
     public void setUp(){
@@ -60,6 +58,7 @@ public class AuthServiceTest {
                 new PasswordEncoder(), mockRestTemplate);
 
         existingUserEntity = new UserEntity();
+        Long EXISTING_USER_ID = 1L;
         existingUserEntity.setId(EXISTING_USER_ID);
         existingUserEntity.setEmail(EXISTING_USER_EMAIL);
         existingUserEntity.setFirstName("userFirstName");
@@ -73,7 +72,7 @@ public class AuthServiceTest {
     @Test
     public void testRegisterUserSuccess(){
 
-        final String NEW_USER_ID = "new-user-id";
+        final Long NEW_USER_ID = 1L;
         final String NEW_USER_EMAIL = "newUser@Email.com";
         final String FIRST_NAME = "NewUserFirstName";
         final String LAST_NAME = "NewUserLastName";
@@ -190,7 +189,7 @@ public class AuthServiceTest {
         userToSave.setEmail(fbUserEmail);
 
         when(mockUserRepository.save(any())).thenAnswer((Answer<UserEntity>) invocation -> {
-            userToSave.setId("fb-user-id");
+            userToSave.setId(1L);
             return userToSave;
         });
 

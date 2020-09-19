@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupModel {
-    String id;
+    Long id;
     String name;
     GroupUserModel owner;
     private Date date;

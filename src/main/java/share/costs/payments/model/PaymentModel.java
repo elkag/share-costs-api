@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Data
 public class PaymentModel {
-    private String id;
+    private Long id;
     private PaymentType method;
     private String description;
     private Integer amount;
