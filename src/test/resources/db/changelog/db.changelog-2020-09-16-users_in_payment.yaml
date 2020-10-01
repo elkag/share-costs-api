@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - property:
+      name: u_id
+      value: uuid()
+      dbms: mysql
+  - changeSet:
+      id: add-users_in_payment-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: users_in_payment
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: amount
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: weight
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+              - column:
+                  name: payment_id
+                  type: bigint
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: users_in_payment
+            constraintName: fk_user_in_payment_user
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: payment_id
+            baseTableName: users_in_payment
+            constraintName: fk_user_in_payment_payment
+            referencedColumnNames: id
+            referencedTableName: payments
+            validate: true

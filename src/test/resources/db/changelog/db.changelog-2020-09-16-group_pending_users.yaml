@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-group_pending_users-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: group_pending_users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: group_id
+                  type: bigint
+              - column:
+                  name: user_id
+                  type: bigint
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: group_pending_users
+            constraintName: fk_group_pending_user_user
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: group_id
+            baseTableName: group_pending_users
+            constraintName: fk_group_pending_user_group
+            referencedColumnNames: id
+            referencedTableName: bunches
+            validate: true

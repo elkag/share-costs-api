@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-group-user_balances-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: group_user_balances
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: group_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: balance_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: group_user_balances
+            constraintName: fk_group_user_balances_user
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: group_id
+            baseTableName: group_user_balances
+            constraintName: fk_group_user_balances_group
+            referencedColumnNames: id
+            referencedTableName: bunches
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: balance_id
+            baseTableName: group_user_balances
+            constraintName: fk_group_user_balances_balance
+            referencedColumnNames: id
+            referencedTableName: balances
+            validate: true

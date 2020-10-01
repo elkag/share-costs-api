@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-group-users-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: group_users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: group_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: group_users
+            constraintName: fk_group_user_user
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: group_id
+            baseTableName: group_users
+            constraintName: fk_group_user_group
+            referencedColumnNames: id
+            referencedTableName: bunches
+            validate: true

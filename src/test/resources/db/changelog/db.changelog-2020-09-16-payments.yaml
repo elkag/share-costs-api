@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-payments-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: payments
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: amount
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(2000)
+              - column:
+                  name: type
+                  type: integer
+              - column:
+                  name: user_id
+                  type: bigint
+              - column:
+                  name: bunch_id
+                  type: bigint
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: payments
+            constraintName: fk_payment_users
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: bunch_id
+            baseTableName: payments
+            constraintName: fk_payment_group
+            referencedColumnNames: id
+            referencedTableName: bunches
+            validate: true
